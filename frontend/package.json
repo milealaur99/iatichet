@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "react-query": "^3.39.3",
+    "webpack": "^5.93.0"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "webpack-cli": "^5.1.4"
+  }
+}

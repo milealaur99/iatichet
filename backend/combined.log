@@ -1,0 +1,7 @@
+{"level":"error","message":"400 - Unexpected token } in JSON at position 52","timestamp":"2024-06-12T16:08:54.052Z"}
+{"level":"error","message":"500 - Cannot read properties of undefined (reading 'jwt')","timestamp":"2024-06-12T16:18:37.737Z"}
+{"level":"error","message":"500 - Cannot read properties of undefined (reading 'jwt')","timestamp":"2024-06-12T16:21:38.889Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-06-12T16:23:58.011Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-06-25T12:39:11.674Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-06-25T12:44:42.081Z"}
+{"level":"error","message":"400 - Error fetching event","timestamp":"2024-06-27T10:19:34.406Z"}
