@@ -4,7 +4,6 @@ services:
     env: docker
     dockerfilePath: ./backend/Dockerfile
     buildCommand: npm install
-    startCommand: npx nodemon index.ts
     envVars:
       - key: PORT
         value: "5000" # Portul pe care rulează backend-ul
