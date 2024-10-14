@@ -19,7 +19,7 @@ services:
       - key: STRIPE_SECRET_KEY
         value: "sk_test_51PVT2ADAwyrs41d27BHtIAC42kN4i8EOTrPqHyWArjKptuwnqNe44eLSfUpJi8gSqDYB64VxwdLAtdPmZ9Cv7Fqv00Tvq4s9vU" # Cheia secretă Stripe
 
-  - type: static
+  - type: web
     name: iatichet-frontend
     env: docker
     dockerfilePath: ./frontend/Dockerfile
