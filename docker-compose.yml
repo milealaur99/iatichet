@@ -9,18 +9,30 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
-      - WDS_SOCKET_HOST= localhost
+      - WDS_SOCKET_HOST=localhost
+      - REACT_APP_BACKEND_URL=http://localhost:5000
     ports:
       - "3000:3000"
     depends_on:
       - backend
       - redis
       - mongo
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend/event-management
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./frontend/event-management/package.json
 
   backend:
     build: ./backend
     volumes:
       - ./backend/uploads:/backend/uploads
+      - ./backend/pdfs:/backend/pdfs
+      - ./backend/assets:/backend/assets
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -29,6 +41,15 @@ services:
     depends_on:
       - redis
       - mongo
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /backend
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./backend/package.json
 
   mongo:
     image: mongo:latest
@@ -43,9 +64,6 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
-    volumes:
-      - redis-data:/data
 
 volumes:
   mongo-data:
-  redis-data:

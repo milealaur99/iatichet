@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import Event from "../models/Event";
-import Hall from "../models/Hall";
+import Event, { Event as EventType } from "../models/Event";
+import Hall, { Hall as HallType, Seat } from "../models/Hall";
 import mongoose from "mongoose";
 import { AppError } from "../middlewares/errorMiddleware";
-import { filterEvents } from "../utils/eventHelpers";
 import { upload } from "../middlewares/uploadImageMiddleware";
 import { fork } from "child_process";
 import path from "path";
@@ -14,7 +13,6 @@ export const createEvent = async (
   next: NextFunction
 ) => {
   upload(req, res, async (err) => {
-    console.log(err, req);
     if (err) {
       return next(new AppError(err.message, 400));
     }
@@ -38,10 +36,10 @@ export const createEvent = async (
           .status(409)
           .json({ message: "The name of the event already exists" });
       }
-
       const child = fork(
-        path.join(__dirname, "..", "..", "src", "utils", "imageProcessor.ts")
+        path.join(__dirname, "..", "..", "src", "utils", "imageProcessor.js")
       );
+
       child.send(req.file.path);
 
       child.on("message", async (message: { processedPath: string }) => {
@@ -54,14 +52,15 @@ export const createEvent = async (
           tichetPrice,
           hall: hallModel._id,
           seats: [],
-          poster: processedPath,
+          poster: processedPath
         });
 
         await event.save();
 
-        await res
-          .status(201)
-          .json({ message: "Event created successfully", event });
+        res.status(201).json({
+          message: "Event created successfully",
+          event: { ...event.toObject(), hall: hallModel.name }
+        });
       });
 
       child.on("error", (error) => {
@@ -78,7 +77,7 @@ export const getAllEvents = async (
     query?: {
       page?: number;
       price?: number;
-      date?: Date;
+      date?: string;
       hall?: string;
       seatsPercentage?: number;
     };
@@ -92,35 +91,79 @@ export const getAllEvents = async (
       date,
       hall,
       seatsPercentage,
+      search
     }: {
       price?: number;
-      date?: Date | [Date, Date];
+      date?: string;
       hall?: string;
       seatsPercentage?: number;
+      search?: string;
     } = req.query;
 
     const page: number = req.query.page ? +req.query.page : 1;
     const skip: number = (page - 1) * 10;
 
-    const currentEvents = await Event.find();
+    const [startDate, endDate] = (date || "").split("|") as [string, string];
+    const parsedStartDate = startDate
+      ? new Date(+startDate).getTime()
+      : new Date().setHours(0, 0, 0, 0);
+    const parsedEndDate = endDate ? new Date(+endDate).getTime() : undefined;
 
-    const filteredEvents = filterEvents(
-      currentEvents,
-      price,
-      date,
-      hall,
-      seatsPercentage
-    );
-    if (filteredEvents.length === 0) {
-      return res.status(404).json({ message: "No events found" });
+    const hallId = hall ? (await Hall.findOne({ name: hall }))?._id : null;
+
+    const query: Object = {
+      ...(startDate && endDate
+        ? {
+            date: {
+              $gte: parsedStartDate,
+              $lte: parsedEndDate
+            }
+          }
+        : { date: { $gte: new Date().setHours(0, 0, 0, 0) } }),
+      ...(price ? { tichetPrice: { $lte: Number(price) } } : {}),
+      ...(search ? { name: { $regex: new RegExp(search, "i") } } : {}),
+      ...(hall ? { hall: hallId } : {})
+    };
+
+    let currentEvents = await Event.find(query).populate("hall").exec();
+
+    if (seatsPercentage !== undefined) {
+      currentEvents = currentEvents.filter(async (event: EventType) => {
+        const totalSeats = event.seats.length;
+        const eventHall = await Hall.find(event.hall);
+        const hallSeats = eventHall[0].seats;
+
+        const availableSeats = hallSeats.filter(
+          (seat: Seat) => !seat.reservationOps.isReserved
+        ).length;
+        const calculatedSeatsPercentage = (availableSeats / totalSeats) * 100;
+
+        return calculatedSeatsPercentage >= seatsPercentage;
+      });
     }
-    const totalPages = Math.ceil(filteredEvents.length / 10);
-    const firstTenEvents = filteredEvents.slice(skip, skip + 10);
+
+    const totalEvents = currentEvents.length;
+    currentEvents = currentEvents.slice(skip, skip + 10);
+
+    const eventsWithHall = currentEvents.map((event: EventType) => ({
+      ...event.toObject(),
+      hall: (event.hall as unknown as EventType)?.name || ""
+    }));
+
+    if (eventsWithHall.length === 0) {
+      return res.status(200).json({
+        events: [],
+        totalPages: 0,
+        page: 1
+      });
+    }
+
+    const totalPages = Math.ceil(totalEvents / 10);
 
     return res.status(200).json({
-      events: firstTenEvents,
+      events: eventsWithHall,
       totalPages,
-      page,
+      page
     });
   } catch (error) {
     next(new AppError("Error fetching events", 400));
@@ -133,44 +176,16 @@ export const getEventById = async (
   next: NextFunction
 ) => {
   try {
-    console.log("intra aici fara sens");
-    const eventModel = await Event.findById(req.params.id);
+    const eventModel = await Event.findById(req.params.id).populate("hall");
     if (!eventModel) {
       return res.status(404).json({ message: "Event not found" });
     }
-    res.status(200).json(eventModel);
+    res.status(200).json({
+      ...eventModel.toObject(),
+      hall: (eventModel.hall as any)?.name || ""
+    });
   } catch (error) {
     next(new AppError("Error fetching event", 400));
-  }
-};
-
-export const updateEvent = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { name, description, date, location, seatsAvailable } = req.body;
-    const event = await Event.findByIdAndUpdate(
-      req.params.id,
-      {
-        _id: new mongoose.Types.ObjectId(),
-        name,
-        description,
-        date,
-        location,
-        seatsAvailable,
-      },
-      { new: true }
-    );
-
-    if (!event) {
-      return res.status(404).json({ message: "Event not found" });
-    }
-
-    res.status(200).json({ message: "Event updated successfully", event });
-  } catch (error) {
-    next(new AppError("Error updating event", 400));
   }
 };
 

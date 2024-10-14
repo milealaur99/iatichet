@@ -1,0 +1,276 @@
+openapi: 3.0.0
+info:
+  title: Auth Routes
+  version: 1.0.0
+  description: Auth routes for the backend
+
+tags:
+  - name: Auth
+    description: Authentication routes
+
+paths:
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login
+      description: Login to the application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Username of the user
+                  example: "user"
+                password:
+                  type: string
+                  format: password
+                  description: Password of the user
+                  example: "password"
+      responses:
+        "200":
+          description: OK - User successfully logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logged in successfully"
+                  token:
+                    type: string
+                    description: JWT token for authenticated requests
+                  userId:
+                    type: string
+                    description: The ID of the logged-in user
+        "400":
+          description: Bad Request - Missing username or password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Missing username or password"
+        "401":
+          description: Unauthorized - Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid credentials"
+
+  /api/auth/signup:
+    post:
+      tags:
+        - Auth
+      summary: Signup
+      description: Register a new user in the application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Username of the user
+                  example: "newuser"
+                email:
+                  type: string
+                  description: Email of the user
+                  example: "user@example.com"
+                password:
+                  type: string
+                  format: password
+                  description: Password of the user
+                  example: "password"
+                confirmPassword:
+                  type: string
+                  format: password
+                  description: Confirm password of the user
+                  example: "password"
+      responses:
+        "200":
+          description: OK - User successfully signed up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Signed in successfully"
+                  token:
+                    type: string
+                    description: JWT token for authenticated requests
+        "400":
+          description: Bad Request - Missing username, email, or password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Missing username, email, or password"
+        "401":
+          description: Unauthorized - Passwords do not match
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid credentials"
+        "409":
+          description: Conflict - Username or email already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Username already exists"
+
+  /api/auth/logout:
+    get:
+      tags:
+        - Auth
+      summary: Logout
+      description: Logs the user out by clearing the authentication cookie (JWT).
+      responses:
+        "200":
+          description: OK - User successfully logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logged out successfully"
+
+  /api/auth/reset-password:
+    post:
+      tags:
+        - Auth
+      summary: Reset Password
+      description: Resets the user's password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  format: password
+                  description: New password for the user
+                  example: "newpassword123"
+                confirmPassword:
+                  type: string
+                  format: password
+                  description: Confirm the new password
+                  example: "newpassword123"
+      responses:
+        "200":
+          description: OK - Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password changed successfully"
+        "401":
+          description: Unauthorized - Passwords do not match
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid credentials"
+
+  /api/auth/user-info/{id}:
+    get:
+      tags:
+        - Auth
+      summary: Get User Info
+      description: Retrieve information of the user. If no ID is provided, the ID from the token will be used.
+      parameters:
+        - name: id
+          in: path
+          description: Optional ID of the user
+          required: false
+          schema:
+            type: string
+            example: "66d8d79c0182e606119d8a71"
+      security:
+        - bearerAuth: [] # This represents the JWT token used for authentication
+      responses:
+        "200":
+          description: OK - User info retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                    description: The user's ID
+                  username:
+                    type: string
+                    description: The user's username
+                  email:
+                    type: string
+                    description: The user's email
+                  role:
+                    type: string
+                    description: The user's role
+        "401":
+          description: Unauthorized - No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Access denied. No token provided."
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
