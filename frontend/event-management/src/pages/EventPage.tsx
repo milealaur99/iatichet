@@ -129,7 +129,7 @@ const EventPage: React.FC = () => {
     ["event", eventId],
     async () => {
       const response = await axios.get(
-        `http://localhost:5000/api/events/${eventId}`
+        `${process.env.REACT_APP_BACKEND_URL}/api/events/${eventId}`
       );
       return response.data;
     },
@@ -141,7 +141,7 @@ const EventPage: React.FC = () => {
   );
 
   useEffect(() => {
-    const socket = io("http://localhost:5000", {
+    const socket = io(process.env.REACT_APP_BACKEND_URL ?? "", {
       transports: ["websocket"]
     });
     socket.emit("joinEvent", eventId);

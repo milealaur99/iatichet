@@ -7,7 +7,7 @@ export const signUp = async (userData: {
   confirmPassword: string;
 }) => {
   const response = await axios.post(
-    "http://localhost:5000/api/auth/signup",
+    `${process.env.REACT_APP_BACKEND_URL}/api/auth/signup`,
     userData
   );
   return response.data;
@@ -18,7 +18,7 @@ export const signIn = async (userData: {
   password: string;
 }) => {
   const response = await axios.post(
-    "http://localhost:5000/api/auth/login",
+    `${process.env.REACT_APP_BACKEND_URL}/api/auth/login`,
     userData
   );
   localStorage.setItem("token", response.data.token);

@@ -37,7 +37,7 @@ export const SuccessPage = () => {
   const downloadPDF = async (event: React.MouseEvent<HTMLButtonElement>) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/payment/download-reservation?reservationId=${id}`
+        `${process.env.REACT_APP_BACKEND_URL}/api/payment/download-reservation?reservationId=${id}`
       );
       if (response.ok) {
         const blob = await response.blob();

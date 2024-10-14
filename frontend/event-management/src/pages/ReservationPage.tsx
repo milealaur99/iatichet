@@ -87,7 +87,7 @@ export const ReservationPage = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `http://localhost:5000/api/reservations/${reservationId}`
+          `${process.env.REACT_APP_BACKEND_URL}/api/reservations/${reservationId}`
         );
         setReservation(response.data);
       } catch (err) {
@@ -103,7 +103,7 @@ export const ReservationPage = () => {
   const handleCancelReservation = async () => {
     try {
       await axios.put(
-        `http://localhost:5000/api/reservations/cancel/${reservationId}`
+        `${process.env.REACT_APP_BACKEND_URL}/api/reservations/cancel/${reservationId}`
       );
       setReservation({ ...reservation!, isPaid: false });
     } catch (err) {
@@ -120,7 +120,7 @@ export const ReservationPage = () => {
   const handleDeleteReservation = async () => {
     try {
       await axios.delete(
-        `http://localhost:5000/api/reservations/${reservationId}`
+        `${process.env.REACT_APP_BACKEND_URL}/api/reservations/${reservationId}`
       );
       navigate("/admin/reservations");
     } catch (err) {

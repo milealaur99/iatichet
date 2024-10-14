@@ -120,7 +120,7 @@ export const SeatMap = ({
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/reservations/create",
+        `${process.env.REACT_APP_BACKEND_URL}/api/reservations/create`,
         {
           eventId,
           seats: selectedSeats
@@ -133,7 +133,7 @@ export const SeatMap = ({
       );
       const { reservation } = response.data;
       const checkoutSession = await axios.post(
-        "http://localhost:5000/api/payment/create-checkout-session",
+        `${process.env.REACT_APP_BACKEND_URL}/api/payment/create-checkout-session`,
         { reservation },
         {
           headers: {

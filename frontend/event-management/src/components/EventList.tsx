@@ -177,12 +177,15 @@ export const EventList: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get("http://localhost:5000/api/events", {
-          params: {
-            page: currentPage,
-            ...appliedFilters
+        const response = await axios.get(
+          `${process.env.REACT_APP_BACKEND_URL}/api/events`,
+          {
+            params: {
+              page: currentPage,
+              ...appliedFilters
+            }
           }
-        });
+        );
         setEvents(response.data.events ?? []);
         setTotalPages(response.data.totalPages ?? 0);
       } catch (error) {

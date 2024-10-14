@@ -102,7 +102,7 @@ export const UserReservations = () => {
     ["userInfo", userId],
     async () => {
       const response = await axios.get(
-        `http://localhost:5000/api/auth/user-info/${userId}`
+        `${process.env.REACT_APP_BACKEND_URL}/api/auth/user-info/${userId}`
       );
       return response.data;
     },
@@ -115,7 +115,7 @@ export const UserReservations = () => {
     ["userReservations", userId, page],
     async () => {
       const response = await axios.get(
-        `http://localhost:5000/api/reservations/user/${userId}?page=${page}`
+        `${process.env.REACT_APP_BACKEND_URL}/api/reservations/user/${userId}?page=${page}`
       );
       return response.data;
     }
@@ -125,7 +125,7 @@ export const UserReservations = () => {
   const deleteReservation = useMutation(
     async (reservationId: string) => {
       await axios.delete(
-        `http://localhost:5000/api/reservations/${reservationId}`
+        `${process.env.REACT_APP_BACKEND_URL}/api/reservations/${reservationId}`
       );
     },
     {
@@ -139,7 +139,7 @@ export const UserReservations = () => {
   const cancelReservation = useMutation(
     async (reservationId: string) => {
       await axios.put(
-        `http://localhost:5000/api/reservations/cancel/${reservationId}`
+        `${process.env.REACT_APP_BACKEND_URL}/api/reservations/cancel/${reservationId}`
       );
     },
     {
@@ -153,7 +153,7 @@ export const UserReservations = () => {
   const downloadReservation = async (reservationId: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/payment/download-reservation?reservationId=${reservationId}`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/payment/download-reservation?reservationId=${reservationId}`,
         {
           responseType: "blob"
         }

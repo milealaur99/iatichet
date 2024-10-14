@@ -114,7 +114,7 @@ export const fetchUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/auth/user-info"
+        `${process.env.REACT_APP_BACKEND_URL}/api/auth/user-info`
       );
       return response.data;
     } catch (error: any) {

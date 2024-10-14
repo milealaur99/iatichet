@@ -125,7 +125,7 @@ export const UserManagement = () => {
     ["user", searchTerm],
     async () => {
       const response = await axios.get(
-        `http://localhost:5000/api/admin/find-users/${searchTerm}`
+        `${process.env.REACT_APP_BACKEND_URL}/api/admin/find-users/${searchTerm}`
       );
       return response.data;
     },
@@ -138,9 +138,12 @@ export const UserManagement = () => {
 
   const manageRole = useMutation(
     async ({ userId, role }: { userId: string; role: string }) => {
-      await axios.put(`http://localhost:5000/api/admin/users/${userId}`, {
-        role
-      });
+      await axios.put(
+        `${process.env.REACT_APP_BACKEND_URL}/api/admin/users/${userId}`,
+        {
+          role
+        }
+      );
     },
     {
       onSuccess: () => queryClient.invalidateQueries("user")
@@ -149,7 +152,9 @@ export const UserManagement = () => {
 
   const deleteUser = useMutation(
     async (userId: string) => {
-      await axios.delete(`http://localhost:5000/api/admin/users/${userId}`);
+      await axios.delete(
+        `${process.env.REACT_APP_BACKEND_URL}/api/admin/users/${userId}`
+      );
     },
     {
       onSuccess: () => queryClient.invalidateQueries("user")

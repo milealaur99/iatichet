@@ -2,7 +2,9 @@ import axios from "axios";
 
 export const getEvents = async () => {
   try {
-    const response = await axios.get("http://localhost:5000/api/events");
+    const response = await axios.get(
+      `${process.env.REACT_APP_BACKEND_URL}/api/events`
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -20,7 +22,7 @@ export const createEvent = async (eventData: FormData) => {
       }
     };
     const response = await axios.post(
-      "http://localhost:5000/api/events/create",
+      `${process.env.REACT_APP_BACKEND_URL}/api/events/create`,
       eventData,
       options
     );
@@ -33,9 +35,12 @@ export const createEvent = async (eventData: FormData) => {
 
 export const searchEvents = async (search: string) => {
   try {
-    const response = await axios.get(`http://localhost:5000/api/events`, {
-      params: { search }
-    });
+    const response = await axios.get(
+      `${process.env.REACT_APP_BACKEND_URL}/api/events`,
+      {
+        params: { search }
+      }
+    );
     return response.data.events;
   } catch (error) {
     console.error("Error searching events:", error);
