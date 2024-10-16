@@ -59,7 +59,7 @@ const apolloServer = new ApolloServer({
 const server = http.createServer(app);
 
 setupIoSockets(server);
-
+server.listen(PORT);
 mongoose
   .connect(process.env.MONGO_URI as string)
   .then(async () => {
