@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "nodemon src/index.ts && npm run sentry:sourcemaps",
+    "start": "nodemon --exec ts-node index.ts && npm run sentry:sourcemaps",
     "test": "jest --runInBand --detectOpenHandles --silent",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org iatichet --project node-express ./out && sentry-cli --url https://sentry.io/ sourcemaps upload --org iatichet --project node-express ./out"
   },
