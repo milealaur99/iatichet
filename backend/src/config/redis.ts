@@ -3,7 +3,7 @@ import { createClient } from "redis";
 const client = createClient({
   legacyMode: true,
   socket: {
-    port: process.env.REDIS_PORT as unknown as number,
+    port: Number(process.env.REDIS_PORT) as unknown as number,
     host: process.env.REDIS_HOST as string
   }
 });
