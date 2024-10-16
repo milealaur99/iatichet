@@ -2,11 +2,10 @@ import { createClient } from "redis";
 
 const client = createClient({
   legacyMode: true,
-  url: process.env.REDIS_URL
-  // socket: {
-  //   port: process.env.REDIS_PORT as unknown as number,
-  //   host: process.env.REDIS_HOST as string
-  // }
+  socket: {
+    port: process.env.REDIS_PORT as unknown as number,
+    host: process.env.REDIS_HOST as string
+  }
 });
 
 client.on("error", (err, info, extra) => {
