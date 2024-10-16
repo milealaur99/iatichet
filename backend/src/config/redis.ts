@@ -1,5 +1,5 @@
 import { createClient } from "redis";
-
+console.log(process.env.REDIS_PORT);
 const client = createClient({
   legacyMode: true,
   socket: {

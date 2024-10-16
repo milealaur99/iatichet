@@ -168,7 +168,7 @@ export const success = async (
     await generateReservationPDF(reservation, pdfPath);
 
     res.redirect(
-      `http://localhost:3000/success/${reservation._id}?eventId=${reservation.event}`
+      `${process.env.REACT_APP_BACKEND_URL}/success/${reservation._id}?eventId=${reservation.event}`
     );
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
@@ -249,7 +249,7 @@ export const cancel = async (
   });
 
   res.redirect(
-    `http://localhost:3000/cancel/${reservation._id}?eventId=${reservation.event}`
+    `${process.env.REACT_APP_BACKEND_URL}/cancel/${reservation._id}?eventId=${reservation.event}`
   );
 };
 

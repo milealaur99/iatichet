@@ -37,7 +37,7 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
   app.use(helmet());
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: process.env.REACT_APP_BACKEND_URL,
       credentials: true
     })
   );

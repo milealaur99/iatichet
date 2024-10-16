@@ -6,7 +6,7 @@ export const setupIoSockets = (server: http.Server) => {
   const io = new SocketServer(server, {
     transports: ["websocket"],
     cors: {
-      origin: "http://localhost:3000",
+      origin: process.env.REACT_APP_BACKEND_URL,
       methods: ["GET", "POST"],
       credentials: true
     }
