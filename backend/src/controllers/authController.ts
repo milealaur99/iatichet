@@ -2,6 +2,7 @@ import { Response, Request } from "express";
 import { sign } from "../utils/jwt";
 import UserModel, { User } from "../models/User";
 import bcrypt from "bcryptjs";
+import { omit } from "lodash";
 
 export const login = async (req: Request & { user?: User }, res: Response) => {
   const { username, password } = req.body;
@@ -24,22 +25,28 @@ export const login = async (req: Request & { user?: User }, res: Response) => {
     username,
     id: userModel._id?.toString() ?? "",
     password: userModel.password,
-    role: userModel.role,
+    role: userModel.role
   });
-  res.cookie("jwt", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-  });
+  res.cookie("jwt", token);
 
-  return res.json({ message: "Logged in successfully", token });
+  return res.json({
+    message: "Logged in successfully",
+    token,
+    userId: userModel._id
+  });
 };
 
 export const signup = async (req: Request & { user?: User }, res: Response) => {
-  const { username, password, confirmPassword } = req.body;
-  const userModel = await UserModel.findOne({ username });
+  const { username, password, confirmPassword, email } = req.body;
+  let userModel = await UserModel.findOne({ username });
 
   if (userModel) {
     return res.status(409).json({ message: "Username already exists" });
+  }
+  userModel = await UserModel.findOne({ email });
+
+  if (userModel?.email === email) {
+    return res.status(409).json({ message: "Email already exists" });
   }
 
   if (password === confirmPassword) {
@@ -47,7 +54,7 @@ export const signup = async (req: Request & { user?: User }, res: Response) => {
     const newUser = new UserModel({
       username,
       password: hashedPw,
-      email: username + "@gmail.com",
+      email
     });
     await newUser.save();
 
@@ -55,12 +62,10 @@ export const signup = async (req: Request & { user?: User }, res: Response) => {
       username,
       id: newUser?.id,
       password: await bcrypt.hash(password, 12),
-      role: "user",
+      role: "user"
     });
-    res.cookie("jwt", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-    });
+
+    res.cookie("jwt", token, { httpOnly: true });
     return res.json({ message: "Signed in successfully", token });
   } else {
     return res.status(401).json({ message: "Invalid credentials" });
@@ -91,4 +96,19 @@ export const deleteAccount = async (
 ) => {
   await UserModel.findByIdAndDelete(req.user?.id);
   return res.json({ message: "Account deleted successfully" });
+};
+
+export const getUserInfo = async (
+  req: Request & { user?: User },
+  res: Response
+) => {
+  try {
+    const user = await UserModel.findById(req.params.id ?? req.user?.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.json(omit(user, "password"));
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };

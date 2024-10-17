@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import User, { User as UserModel } from "../models/User";
+import { omit } from "lodash";
 
 export const deleteUser = async (
   req: Request,
@@ -43,4 +44,20 @@ export const getUsers = async (
   }
 
   return res.status(200).json(users);
+};
+
+export const findUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const users = await User.find({
+    username: { $regex: req.params.username, $options: "i" }
+  });
+
+  if (!users || users.length === 0) {
+    return res.status(404).json({ message: "Users not found" });
+  }
+
+  return res.status(200).json(users.map((user) => omit(user, "password")));
 };

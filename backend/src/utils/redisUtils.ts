@@ -1,24 +1,45 @@
 import { promisify } from "util";
-import client from "../config/redis";
+import { client } from "../config/redis";
 import {
   convertBinaryToObject,
-  convertObjectToBinary,
+  convertObjectToBinary
 } from "../utils/binaryTransformer";
 
-const getAsync = promisify(async (key: string) => {
-  const data = await client.get(key);
-  if (!data) {
+client.on("error", (err) => console.log("Redis Client Error", err));
+
+client
+  .connect()
+  .then(() => {
+    console.log("Connected to Redis");
+  })
+  .catch((err) => {
+    console.error("Error connecting to Redis:", err);
+  });
+
+const getAsync = async (key: string) => {
+  try {
+    const data = await promisify(client.get).bind(client)(key);
+
+    if (!data) {
+      return null;
+    }
+
+    return convertBinaryToObject(data);
+  } catch (error) {
     return null;
   }
-  const binaryData = JSON.parse(data);
-  return convertBinaryToObject(binaryData);
-}).bind(client);
+};
 
-const setAsync = promisify(
-  async ({ key, value }: { key: string; value: any }) => {
+const setAsync = async ({ key, value }: { key: string; value: any }) => {
+  try {
     const binaryValue = await convertObjectToBinary(value);
-    return client.setEx(key, 3600, binaryValue);
+    await client.setEx(key, 3600, binaryValue);
+  } catch (error) {
+    console.error("Error setting data in Redis:", error);
   }
-).bind(client);
+};
 
-export { getAsync, setAsync };
+const timeoutStorage = new Map();
+const usersViewingEvent = new Map();
+
+export { getAsync, setAsync, timeoutStorage, usersViewingEvent };

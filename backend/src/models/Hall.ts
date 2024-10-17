@@ -22,14 +22,14 @@ export const SeatSchema = new Schema<Seat>(
     reservationOps: {
       type: {
         isReserved: Boolean,
-        reservation: { type: String, ref: "Reservation" },
+        reservation: { type: String, ref: "Reservation" }
       },
       default: {
         isReserved: false,
         reservation: null,
-        required: false,
-      },
-    },
+        required: false
+      }
+    }
   },
   { _id: false }
 );
@@ -37,7 +37,7 @@ export const SeatSchema = new Schema<Seat>(
 const HallSchema = new Schema<Hall>({
   name: { type: String, required: true },
   type: { type: String, required: true },
-  seats: { type: [SeatSchema], required: true },
+  seats: { type: [SeatSchema], required: true }
 });
 
 HallSchema.statics.initializeHalls = async function () {
@@ -49,7 +49,7 @@ HallSchema.statics.initializeHalls = async function () {
       return {
         row,
         number,
-        reservationOps: { isReserved: false, reservation: null },
+        reservationOps: { isReserved: false, reservation: null }
       };
     });
 
@@ -59,12 +59,12 @@ HallSchema.statics.initializeHalls = async function () {
   const largeHall = await this.findOne({ name: "Large Hall" });
   if (!largeHall) {
     const seats: Seat[] = Array.from({ length: 200 }, (_, i) => {
-      const row = String.fromCharCode(65 + Math.floor(i / 20));
-      const number = (i % 20) + 1;
+      const row = String.fromCharCode(65 + Math.floor(i / 10));
+      const number = (i % 10) + 1;
       return {
         row,
         number,
-        reservationOps: { isReserved: false, reservation: null },
+        reservationOps: { isReserved: false, reservation: null }
       };
     });
 

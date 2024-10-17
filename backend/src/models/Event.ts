@@ -18,7 +18,7 @@ const EventSchema: Schema = new Schema({
   tichetPrice: { type: Number, required: true },
   hall: { type: Schema.Types.ObjectId, ref: "Hall", required: true },
   seats: [{ type: SeatSchema, required: true }],
-  poster: { type: String, required: false },
+  poster: { type: String, required: false }
 });
 
 export default mongoose.model<Event>("Event", EventSchema);

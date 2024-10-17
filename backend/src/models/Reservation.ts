@@ -7,6 +7,9 @@ export interface Reservation extends Document {
   date: Date;
   price: number;
   seats: Seat[];
+  eventDate: Date;
+  isPaid: boolean;
+  paymentLink: string | null;
 }
 
 const ReservationSchema: Schema = new Schema({
@@ -16,6 +19,9 @@ const ReservationSchema: Schema = new Schema({
   date: { type: Date, required: true },
   price: { type: Number, required: true },
   seats: [{ type: SeatSchema, required: true }],
+  eventDate: { type: Date, required: true },
+  isPaid: { type: Boolean, default: false },
+  paymentLink: { type: String, required: false }
 });
 
 export default mongoose.model<Reservation>("Reservation", ReservationSchema);
