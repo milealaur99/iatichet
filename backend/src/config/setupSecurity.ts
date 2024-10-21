@@ -19,10 +19,6 @@ const LIMITER_MESSAGE =
   "Too many requests from this IP, please try again later.";
 const csrfProtection = csrf({
   cookie: true,
-  origin: "https://iatichet-frontend.onrender.com", // Frontend URL
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true, // This allows cookies to be sent along with the request if needed
-  optionsSuccessStatus: 200,
 });
 
 const setupCSRF = ({ app }: { app: express.Express }) => {
@@ -45,6 +41,8 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
     cors({
       origin: process.env.REACT_APP_BACKEND_URL,
       credentials: true,
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+      optionsSuccessStatus: 200,
     })
   );
   app.use(express.json());
