@@ -40,7 +40,7 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
   app.use(
     cors({
       origin: "*", // Allow all origins
-      credentials: true, // Allow credentials to be sent (like cookies)
+      credentials: false, // Allow credentials to be sent (like cookies)
       allowedHeaders: [
         "Content-Type",
         "Authorization",
