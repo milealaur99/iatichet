@@ -39,14 +39,16 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
   app.use(helmet());
   app.use(
     cors({
-      origin: process.env.REACT_APP_BACKEND_URL,
-      credentials: true,
+      origin: "*", // Allow all origins
+      credentials: true, // Allow credentials to be sent (like cookies)
       allowedHeaders: [
         "Content-Type",
         "Authorization",
         "X-CSRF-Token",
         "ngrok-skip-browser-warning",
+        "*", // Allow any header
       ],
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow all methods
     })
   );
   app.options("*", cors());
