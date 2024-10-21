@@ -43,8 +43,10 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
       credentials: true,
       methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
       optionsSuccessStatus: 200,
+      allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"], // Allow necessary headers
     })
   );
+  app.options("*", cors());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(
