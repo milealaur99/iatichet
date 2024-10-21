@@ -41,9 +41,6 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
     cors({
       origin: process.env.REACT_APP_BACKEND_URL,
       credentials: true,
-      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-      optionsSuccessStatus: 200,
-      allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"], // Allow necessary headers
     })
   );
   app.options("*", cors());
