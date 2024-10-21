@@ -36,7 +36,7 @@ const StyledContainer = styled(Box)(({ theme }) => ({
   alignItems: "center",
   padding: "30px",
   color: theme.palette.common.white,
-  minHeight: "calc(100vh - 64px)"
+  minHeight: "calc(100vh - 64px)",
 }));
 
 const StyledReservationContainer = styled(Box)(({ theme }) => ({
@@ -48,14 +48,14 @@ const StyledReservationContainer = styled(Box)(({ theme }) => ({
   borderRadius: "16px",
   boxShadow: "0 10px 20px rgba(0, 0, 0, 0.3)",
   margin: "20px auto",
-  maxWidth: "600px"
+  maxWidth: "600px",
 }));
 
 const SeatDisplay = styled(Box)({
   display: "flex",
   flexWrap: "wrap",
   justifyContent: "flex-start",
-  margin: "10px 0"
+  margin: "10px 0",
 });
 
 const SeatItem = styled(Box)(({ theme }) => ({
@@ -64,7 +64,7 @@ const SeatItem = styled(Box)(({ theme }) => ({
   padding: "5px 10px",
   borderRadius: "5px",
   marginRight: "10px",
-  marginBottom: "10px"
+  marginBottom: "10px",
 }));
 
 const HighlightBox = styled(Box)(({ theme }) => ({
@@ -72,7 +72,7 @@ const HighlightBox = styled(Box)(({ theme }) => ({
   borderRadius: "8px",
   padding: "10px",
   textAlign: "center",
-  marginBottom: "15px"
+  marginBottom: "15px",
 }));
 
 export const ReservationPage = () => {
@@ -106,6 +106,7 @@ export const ReservationPage = () => {
         `${process.env.REACT_APP_BACKEND_URL}/api/reservations/cancel/${reservationId}`
       );
       setReservation({ ...reservation!, isPaid: false });
+      navigate(`/event/${reservation?.event}`);
     } catch (err) {
       setError("Failed to cancel reservation.");
     }
@@ -170,8 +171,8 @@ export const ReservationPage = () => {
             sx={(theme) => ({
               textDecoration: "underline",
               "&:hover": {
-                color: theme.palette.secondary.main
-              }
+                color: theme.palette.secondary.main,
+              },
             })}
             to={`/reservations/?userId=${reservation.user._id}`}
           >
@@ -200,8 +201,8 @@ export const ReservationPage = () => {
             sx={(theme) => ({
               textDecoration: "underline",
               "&:hover": {
-                color: theme.palette.secondary.main
-              }
+                color: theme.palette.secondary.main,
+              },
             })}
             to={`/event/${reservation.event}`}
           >
@@ -246,7 +247,7 @@ export const ReservationPage = () => {
                 backgroundColor: theme.palette.secondary.main,
                 color: theme.palette.common.black,
                 "&:hover": { backgroundColor: theme.palette.success.light },
-                marginRight: 2
+                marginRight: 2,
               })}
               onClick={handlePaymentRedirect}
             >
@@ -270,7 +271,7 @@ export const ReservationPage = () => {
               sx={(theme) => ({
                 backgroundColor: theme.palette.error.main,
                 color: theme.palette.common.white,
-                mt: 2
+                mt: 2,
               })}
               onClick={handleDeleteReservation}
             >
