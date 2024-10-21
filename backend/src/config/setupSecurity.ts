@@ -41,6 +41,12 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
     cors({
       origin: process.env.REACT_APP_BACKEND_URL,
       credentials: true,
+      allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "X-CSRF-Token",
+        "ngrok-skip-browser-warning",
+      ],
     })
   );
   app.options("*", cors());
