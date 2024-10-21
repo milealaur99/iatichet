@@ -25,14 +25,18 @@ export const login = async (req: Request & { user?: User }, res: Response) => {
     username,
     id: userModel._id?.toString() ?? "",
     password: userModel.password,
-    role: userModel.role
+    role: userModel.role,
   });
-  res.cookie("jwt", token);
+  res.cookie("jwt", token, {
+    httpOnly: true, // Ensures the cookie is only sent over HTTP(S) and not accessible via JavaScript
+    secure: true, // Ensures the cookie is only sent over HTTPS
+    sameSite: "none", // Allows the cookie to be sent across different domains
+  });
 
   return res.json({
     message: "Logged in successfully",
     token,
-    userId: userModel._id
+    userId: userModel._id,
   });
 };
 
@@ -54,7 +58,7 @@ export const signup = async (req: Request & { user?: User }, res: Response) => {
     const newUser = new UserModel({
       username,
       password: hashedPw,
-      email
+      email,
     });
     await newUser.save();
 
@@ -62,7 +66,7 @@ export const signup = async (req: Request & { user?: User }, res: Response) => {
       username,
       id: newUser?.id,
       password: await bcrypt.hash(password, 12),
-      role: "user"
+      role: "user",
     });
 
     res.cookie("jwt", token, { httpOnly: true });

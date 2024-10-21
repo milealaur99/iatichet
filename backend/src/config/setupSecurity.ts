@@ -30,7 +30,11 @@ const setupCSRF = ({ app }: { app: express.Express }) => {
   });
 
   app.get("/api/csrf-token", (req, res) => {
-    res.cookie("XSRF-TOKEN", req.csrfToken());
+    res.cookie("XSRF-TOKEN", req.csrfToken(), {
+      httpOnly: false, // Allow the client-side JavaScript to read the cookie
+      secure: true, // Set to true when using HTTPS
+      sameSite: "none", // Required for cross-site cookies
+    });
     res.json({ csrfToken: req.csrfToken() });
   });
 };
@@ -39,18 +43,19 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
   app.use(helmet());
   app.use(
     cors({
-      origin: "*", // Allow all origins
-      credentials: false, // Allow credentials to be sent (like cookies)
+      origin: "https://iatichet-frontend.onrender.com", // Specific frontend URL
+      credentials: true, // Allow credentials (cookies)
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: [
         "Content-Type",
         "Authorization",
         "X-CSRF-Token",
-        "ngrok-skip-browser-warning",
-        "*", // Allow any header
+        "ngrok-skip-browser-warning", // Include this header
+        "*",
       ],
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow all methods
     })
   );
+
   app.options("*", cors());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
@@ -80,6 +85,11 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
       secret: process.env.COOKIE_KEY as string,
       resave: false,
       saveUninitialized: false,
+      cookie: {
+        secure: true, // Ensure cookies are only sent over HTTPS
+        httpOnly: true, // For the session cookie, should be inaccessible by JavaScript
+        sameSite: "none", // Allow cross-site requests
+      },
     })
   );
 
@@ -87,5 +97,5 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
   swagger(app);
   initSetry();
 
-  setupCSRF({ app });
+  // setupCSRF({ app });
 };
