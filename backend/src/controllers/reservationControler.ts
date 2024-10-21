@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import Reservation, {
-  Reservation as ReservationType
+  Reservation as ReservationType,
 } from "../models/Reservation";
 import Hall, { Hall as HallType, Seat } from "../models/Hall";
 import EventModel, { Event } from "../models/Event";
@@ -21,7 +21,7 @@ export const createReservation = async (
       timeoutStorage.get(`restoreSeatsForUnpaidReservations-${req.user?.id}`)
     ) {
       return res.status(400).json({
-        message: "You have an unpaid reservation in progress"
+        message: "You have an unpaid reservation in progress",
       });
     }
     if (!req.body.seats || req.body.seats.length === 0) {
@@ -60,7 +60,7 @@ export const createReservation = async (
     if (unavailableSeats.length > 0) {
       return res.status(400).json({
         message: "Some seats are already reserved",
-        unavailableSeats
+        unavailableSeats,
       });
     }
 
@@ -76,7 +76,7 @@ export const createReservation = async (
       seats,
       date: new Date(),
       price: seats.length * eventModel.tichetPrice * 100,
-      eventDate: eventModel.date
+      eventDate: eventModel.date,
     });
 
     eventModel.seats = [
@@ -86,9 +86,9 @@ export const createReservation = async (
         reservationOps: {
           ...seat.reservationOps,
           isReserved: true,
-          reservation: reservation._id
-        }
-      }))
+          reservation: reservation._id,
+        },
+      })),
     ];
 
     await eventModel.save();
@@ -129,7 +129,7 @@ export const createReservation = async (
       timeoutStorage.delete(
         `restoreSeatsForUnpaidReservations-${reservation.user}`
       );
-    }, 30000);
+    }, 30 * 60 * 1000);
 
     timeoutStorage.set(
       `restoreSeatsForUnpaidReservations-${reservation.user}`,
@@ -138,7 +138,7 @@ export const createReservation = async (
 
     res.status(201).json({
       message: "Draft of reservation created successfully",
-      reservation
+      reservation,
     });
   } catch (error) {
     next(new AppError("Error creating reservation", 400));
@@ -161,12 +161,12 @@ export const getAllReservations = async (
     if (!currentReservations) {
       currentReservations = await Reservation.find({ user: req.user?.id }).sort(
         {
-          date: 1
+          date: 1,
         }
       );
       await setAsync({
         key: "/api/reservations",
-        value: currentReservations
+        value: currentReservations,
       });
     }
 
@@ -178,7 +178,7 @@ export const getAllReservations = async (
     return res.status(200).json({
       reservations: filteredReservations,
       totalPages,
-      page
+      page,
     });
   } catch (error) {
     next(new AppError("Error fetching reservations", 400));
@@ -240,7 +240,7 @@ export const deleteReservation = async (
       if (hallSeat) {
         hallSeat.reservationOps = {
           isReserved: false,
-          reservation: null
+          reservation: null,
         };
       }
     }
@@ -255,12 +255,12 @@ export const deleteReservation = async (
         key: "/api/reservations",
         value: currentReservations?.filter(
           (reservation: ReservationType) => reservation._id !== req.params.id
-        )
+        ),
       });
     } else {
       await setAsync({
         key: "/api/reservations",
-        value: await Reservation.find()
+        value: await Reservation.find(),
       });
     }
 
@@ -273,12 +273,12 @@ export const deleteReservation = async (
         key: `/api/reservations/user/${reservation.user}`,
         value: userReservations?.filter(
           (reservation: ReservationType) => reservation._id !== req.params.id
-        )
+        ),
       });
     } else {
       await setAsync({
         key: `/api/reservations/user/${reservation.user}`,
-        value: await Reservation.find({ user: reservation.user })
+        value: await Reservation.find({ user: reservation.user }),
       });
     }
 
@@ -313,12 +313,12 @@ export const getUserReservations = async (
     const skip: number = (page - 1) * limit;
 
     const reservations = (await Reservation.find({
-      user: req.params.userId || req.user?.id
+      user: req.params.userId || req.user?.id,
     })
       .populate("event")
       .populate("hall")
       .sort({
-        date: -1
+        date: -1,
       })) as (ReservationType & {
       event: Event;
       hall: HallType;
@@ -337,7 +337,7 @@ export const getUserReservations = async (
             eventName: reservation.event.name,
             eventId: reservation.event._id,
             hall: reservation.hall,
-            ...(reservation.toObject() as object)
+            ...(reservation.toObject() as object),
           },
           ["event", "hall"]
         )
@@ -346,7 +346,7 @@ export const getUserReservations = async (
     res.status(200).json({
       reservations: filteredReservations,
       totalPages,
-      page
+      page,
     });
   } catch (error) {
     next(new AppError("Error fetching reservations", 400));
@@ -413,7 +413,7 @@ export const cancelPendingReservations = async (
         key: "/api/reservations",
         value: currentReservations.filter(
           (reservation: ReservationType) => reservation._id !== req.params.id
-        )
+        ),
       });
     }
 

@@ -97,5 +97,5 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
   swagger(app);
   initSetry();
 
-  // setupCSRF({ app });
+  setupCSRF({ app });
 };
