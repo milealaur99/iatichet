@@ -17,7 +17,13 @@ const RATE_LIMIT_TIME = 15 * 60 * 1000;
 const MAX_REQUESTS_PER_IP = 100000;
 const LIMITER_MESSAGE =
   "Too many requests from this IP, please try again later.";
-const csrfProtection = csrf({ cookie: true });
+const csrfProtection = csrf({
+  cookie: true,
+  origin: "https://iatichet-frontend.onrender.com", // Frontend URL
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true, // This allows cookies to be sent along with the request if needed
+  optionsSuccessStatus: 200,
+});
 
 const setupCSRF = ({ app }: { app: express.Express }) => {
   app.use(csrfProtection);
@@ -38,7 +44,7 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
   app.use(
     cors({
       origin: process.env.REACT_APP_BACKEND_URL,
-      credentials: true
+      credentials: true,
     })
   );
   app.use(express.json());
@@ -58,7 +64,7 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
   const limiter = rateLimit({
     windowMs: RATE_LIMIT_TIME,
     max: MAX_REQUESTS_PER_IP,
-    message: LIMITER_MESSAGE
+    message: LIMITER_MESSAGE,
   });
   app.use(limiter);
 
@@ -68,7 +74,7 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
     session({
       secret: process.env.COOKIE_KEY as string,
       resave: false,
-      saveUninitialized: false
+      saveUninitialized: false,
     })
   );
 
