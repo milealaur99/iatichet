@@ -34,6 +34,15 @@ jobs:
           NGROK_URL=$(curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
           echo "NGROK_URL=${NGROK_URL}" >> $GITHUB_ENV
 
+      - name: Update Env Var in Frontend
+        run: |
+          echo "REACT_APP_BACKEND_URL=${NGROK_URL}" >> ./frontend/event-management/.env
+          cat ./frontend/event-management/.env
+
+      - name: Build Frontend
+        run: |
+          cd frontend/event-management && npm install && npm run build
+
       - name: Update Env Var on Render.com
         run: |
           curl -X PUT \

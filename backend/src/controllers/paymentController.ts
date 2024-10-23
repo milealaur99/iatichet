@@ -33,17 +33,17 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
           price_data: {
             currency: "RON",
             product_data: {
-              name: event.name
+              name: event.name,
             },
-            unit_amount: event.tichetPrice * 100
+            unit_amount: event.tichetPrice * 100,
           },
-          quantity: reservation.seats.length
-        }
+          quantity: reservation.seats.length,
+        },
       ],
       mode: "payment",
       success_url: successUrl,
       cancel_url: cancelUrl,
-      expires_at: Math.floor(Date.now() / 1000) + 1800
+      expires_at: Math.floor(Date.now() / 1000) + 1800,
     });
 
     const reservationModel: Reservation | null =
@@ -102,11 +102,11 @@ export const success = async (
       const hallSeat = {
         reservationOps: {
           isReserved: true,
-          reservation: (reservation._id as string).toString()
+          reservation: (reservation._id as string).toString(),
         },
         row: seat.row,
         number: seat.number,
-        reservation: (reservation._id as string).toString()
+        reservation: (reservation._id as string).toString(),
       };
 
       eventModel.seats.push(hallSeat);
@@ -129,12 +129,12 @@ export const success = async (
     if (currentReservations) {
       await setAsync({
         key: "/api/reservations",
-        value: [...currentReservations, reservation]
+        value: [...currentReservations, reservation],
       });
     } else {
       await setAsync({
         key: "/api/reservations",
-        value: await ReservationModel.find()
+        value: await ReservationModel.find(),
       });
     }
 
@@ -145,14 +145,14 @@ export const success = async (
     if (userReservations) {
       await setAsync({
         key: `/api/reservations/${reservation.user.toString()}`,
-        value: [...userReservations, reservation]
+        value: [...userReservations, reservation],
       });
     } else {
       await setAsync({
         key: `/api/reservations/${reservation.user.toString()}`,
         value: await ReservationModel.find({
-          user: reservation.user.toString()
-        })
+          user: reservation.user.toString(),
+        }),
       });
     }
 
@@ -162,13 +162,13 @@ export const success = async (
 
     await setAsync({
       key: `/api/events/${reservation.event.toString()}`,
-      value: { ...currentEvent, seats: eventModel.seats }
+      value: { ...currentEvent, seats: eventModel.seats },
     });
 
     await generateReservationPDF(reservation, pdfPath);
 
     res.redirect(
-      `${process.env.REACT_APP_BACKEND_URL}/success/${reservation._id}?eventId=${reservation.event}`
+      `${process.env.REACT_APP_FRONTEND_URL}/success/${reservation._id}?eventId=${reservation.event}`
     );
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
@@ -215,7 +215,7 @@ export const cancel = async (
     );
     await setAsync({
       key: `/api/reservations/${reservation.user.toString()}`,
-      value: updatedUserReservations
+      value: updatedUserReservations,
     });
   }
 
@@ -231,7 +231,7 @@ export const cancel = async (
     if (hallSeat) {
       hallSeat.reservationOps = {
         isReserved: false,
-        reservation: ""
+        reservation: "",
       };
     }
   }
@@ -245,11 +245,11 @@ export const cancel = async (
 
   await setAsync({
     key: `/api/events/${reservation.event}`,
-    value: event
+    value: event,
   });
 
   res.redirect(
-    `${process.env.REACT_APP_BACKEND_URL}/cancel/${reservation._id}?eventId=${reservation.event}`
+    `${process.env.REACT_APP_FRONTEND_URL}/cancel/${reservation._id}?eventId=${reservation.event}`
   );
 };
 

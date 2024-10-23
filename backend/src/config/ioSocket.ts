@@ -6,10 +6,10 @@ export const setupIoSockets = (server: http.Server) => {
   const io = new SocketServer(server, {
     transports: ["websocket"],
     cors: {
-      origin: process.env.REACT_APP_BACKEND_URL,
+      origin: process.env.REACT_APP_FRONTEND_URL,
       methods: ["GET", "POST"],
-      credentials: true
-    }
+      credentials: true,
+    },
   });
 
   io.on("connection", (socket) => {
