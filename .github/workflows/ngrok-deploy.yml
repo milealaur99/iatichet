@@ -30,12 +30,12 @@ jobs:
           npm install ts-node typescript dotenv express mongoose apollo-server-express socket.io http swagger-ui-express @types/node --save-dev
 
       - name: Run Docker Compose
-        run: docker-compose up --build backend
+        run: docker-compose up --build -d backend
 
       - name: Wait for Backend Health Check
         run: |
           echo "Checking if backend is ready..."
-          RETRIES=10
+          RETRIES=100
           until $(curl --output /dev/null --silent --head --fail http://localhost:5000); do
             if [ $RETRIES -eq 0 ]; then
               echo "Backend did not become ready in time."
