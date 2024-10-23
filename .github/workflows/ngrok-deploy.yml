@@ -23,19 +23,19 @@ jobs:
           sudo mv ngrok /usr/local/bin/
           ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm install
+          npm install ts-node typescript dotenv express mongoose apollo-server-express socket.io http swagger-ui-express @types/node --save-dev
+
       - name: Run Docker Compose
-        run: docker-compose up --build -d
+        run: docker-compose up --build backend
 
       - name: Wait for Backend and Ngrok to Start
         run: |
           echo "Waiting for Backend and Ngrok to start..."
           sleep 20
-
-      - name: Install Backend Dependencies
-        run: |
-          docker-compose exec -T backend npm install
-          docker-compose exec -T backend npm install ts-node typescript dotenv express mongoose apollo-server-express socket.io http swagger-ui-express @types/node --save-dev
-          docker-compose exec -T backend npm install
 
       - name: Check if Ngrok is Running and Fetch URL
         run: |
