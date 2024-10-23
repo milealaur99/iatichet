@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -13,44 +13,48 @@ import { swagger } from "../../src/config/swagger";
 import { initSetry } from "../../src/config/sentry";
 import Hall from "../models/Hall";
 
-const RATE_LIMIT_TIME = 15 * 60 * 1000;
-const MAX_REQUESTS_PER_IP = 100000;
-const LIMITER_MESSAGE =
-  "Too many requests from this IP, please try again later.";
+// CSRF middleware
 const csrfProtection = csrf({
   cookie: true,
 });
 
-const setupCSRF = ({ app }: { app: express.Express }) => {
-  app.use(csrfProtection);
+// Function to decide if CSRF setup should be called
+const setupCSRF = (
+  { app }: { app: express.Express },
+  isNgrokRequest: boolean
+) => {
+  // Don't apply CSRF if it's an Ngrok request
+  if (!isNgrokRequest) {
+    app.use(csrfProtection);
 
-  app.use((req, res, next) => {
-    res.locals.csrfToken = req.csrfToken();
-    next();
-  });
-
-  app.get("/api/csrf-token", (req, res) => {
-    res.cookie("XSRF-TOKEN", req.csrfToken(), {
-      httpOnly: false, // Allow the client-side JavaScript to read the cookie
-      secure: true, // Set to true when using HTTPS
-      sameSite: "none", // Required for cross-site cookies
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      res.locals.csrfToken = req.csrfToken();
+      next();
     });
-    res.json({ csrfToken: req.csrfToken() });
-  });
+
+    app.get("/api/csrf-token", (req: Request, res: Response) => {
+      res.cookie("XSRF-TOKEN", req.csrfToken(), {
+        httpOnly: false, // Allow client-side JS to read the cookie
+        secure: true, // HTTPS
+        sameSite: "none", // Cross-site cookies allowed
+      });
+      res.json({ csrfToken: req.csrfToken() });
+    });
+  }
 };
 
 export const setupSecurity = ({ app }: { app: express.Express }) => {
   app.use(helmet());
   app.use(
     cors({
-      origin: "https://iatichet-frontend.onrender.com", // Specific frontend URL
-      credentials: true, // Allow credentials (cookies)
+      origin: "https://iatichet-frontend.onrender.com",
+      credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: [
         "Content-Type",
         "Authorization",
         "X-CSRF-Token",
-        "ngrok-skip-browser-warning", // Include this header
+        "ngrok-skip-browser-warning",
         "*",
       ],
     })
@@ -72,9 +76,9 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
   );
 
   const limiter = rateLimit({
-    windowMs: RATE_LIMIT_TIME,
-    max: MAX_REQUESTS_PER_IP,
-    message: LIMITER_MESSAGE,
+    windowMs: 15 * 60 * 1000,
+    max: 100000,
+    message: "Too many requests from this IP, please try again later.",
   });
   app.use(limiter);
 
@@ -86,9 +90,9 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: true, // Ensure cookies are only sent over HTTPS
-        httpOnly: true, // For the session cookie, should be inaccessible by JavaScript
-        sameSite: "none", // Allow cross-site requests
+        secure: true, // HTTPS only
+        httpOnly: true, // JS can't access the cookie
+        sameSite: "none", // Cross-site cookies allowed
       },
     })
   );
@@ -97,5 +101,15 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
   swagger(app);
   initSetry();
 
-  setupCSRF({ app });
+  // Detect if the request comes from Ngrok
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const isNgrokRequest = Boolean(
+      req.get("origin")?.includes("ngrok.io") ||
+        req.get("referer")?.includes("ngrok.io")
+    );
+
+    // Conditionally call setupCSRF
+    setupCSRF({ app }, isNgrokRequest);
+    next();
+  });
 };

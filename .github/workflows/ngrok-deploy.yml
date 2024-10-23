@@ -1,0 +1,49 @@
+name: Deploy Backend and Frontend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Docker Compose
+        run: sudo apt-get install -y docker-compose
+
+      - name: Install Ngrok
+        run: |
+          sudo apt-get install ngrok
+          ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
+
+      - name: Run Docker Compose
+        run: docker-compose up -d
+
+      - name: Wait for Backend to Start
+        run: sleep 10
+
+      - name: Fetch Ngrok URL
+        run: |
+          NGROK_URL=$(curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+          echo "NGROK_URL=${NGROK_URL}" >> $GITHUB_ENV
+
+      - name: Update Env Var on Render.com
+        run: |
+          curl -X PUT \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"value": "'$NGROK_URL'"}' \
+            https://api.render.com/v1/env-groups/${{ secrets.ENV_GROUP_ID }}/env-vars/${{ secrets.ENV_VAR_KEY }}
+
+      - name: Trigger Deployment on Render.com
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": "do_not_clear"}' \
+            https://api.render.com/v1/services/${{ secrets.SERVICE_ID }}/deploys
