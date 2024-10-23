@@ -17,15 +17,7 @@ services:
       - backend
       - redis
       - mongo
-    develop:
-      watch:
-        - action: sync
-          path: ./frontend/event-management
-          target: /app
-          ignore:
-            - node_modules/
-        - action: rebuild
-          path: ./frontend/event-management/package.json
+    # Remove the 'develop' section and rely on volumes for live syncing
 
   backend:
     build: ./backend
@@ -33,23 +25,16 @@ services:
       - ./backend/uploads:/backend/uploads
       - ./backend/pdfs:/backend/pdfs
       - ./backend/assets:/backend/assets
+      - ./backend:/backend
     environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     ports:
       - "5000:5000"
     depends_on:
       - redis
       - mongo
-    develop:
-      watch:
-        - action: sync
-          path: ./backend
-          target: /backend
-          ignore:
-            - node_modules/
-        - action: rebuild
-          path: ./backend/package.json
+    # Remove the 'develop' section and rely on volumes for live syncing
 
   mongo:
     image: mongo:latest
