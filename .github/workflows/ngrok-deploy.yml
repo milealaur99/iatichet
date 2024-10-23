@@ -13,34 +13,64 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install Docker Compose
+        run: sudo apt-get install -y docker-compose
+
+      - name: Download and Install Ngrok
+        run: |
+          wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+          unzip ngrok-stable-linux-amd64.zip
+          sudo mv ngrok /usr/local/bin/
+          ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
+
       - name: Run Docker Compose
         run: docker-compose up --build backend
 
-      - name: Setup Ngrok Tunnel
-        uses: dsmirc/ngrok-tunnel-action@cd
-        with:
-          port: 5000
-          ngrok_authtoken: ${{ secrets.NGROK_AUTHTOKEN }}
-          tunnel_type: http
-          timeout: 6h
-
-      - name: Fetch Ngrok URL
+      - name: Wait for Backend and Ngrok to Start
         run: |
-          NGROK_URL=$(cat tunnelURL.md)
-          echo "NGROK_URL=${NGROK_URL}" >> $GITHUB_ENV
+          echo "Waiting for Backend and Ngrok to start..."
+          sleep 20
 
-      - name: Update Env Var in Frontend
+      - name: Check if Ngrok is Running and Fetch URL
         run: |
-          echo "REACT_APP_BACKEND_URL=${NGROK_URL}" >> ./frontend/event-management/.env
+          # Retry until the Ngrok URL is available
+          RETRIES=10
+          while [ $RETRIES -gt 0 ]; do
+            NGROK_URL=$(curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+            if [ -n "$NGROK_URL" ]; then
+              echo "Ngrok URL fetched successfully: $NGROK_URL"
+              echo "NGROK_URL=${NGROK_URL}" >> $GITHUB_ENV
+              break
+            else
+              echo "Ngrok URL not available yet. Retrying..."
+              RETRIES=$((RETRIES-1))
+              sleep 5
+            fi
+          done
+
+          if [ -z "$NGROK_URL" ]; then
+            echo "Error: Could not fetch Ngrok URL."
+            exit 1
+          fi
+
+      - name: Update Env Var in Frontend's .env file
+        run: |
+          echo "REACT_APP_BACKEND_URL=${NGROK_URL}" > ./frontend/event-management/.env
+          echo "Updated REACT_APP_BACKEND_URL in .env to $NGROK_URL"
           cat ./frontend/event-management/.env
 
       - name: Update Env Var on Render.com
         run: |
+          echo "Updating Render.com environment variable with Ngrok URL: $NGROK_URL"
           curl -X PUT \
             -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{"value": "'$NGROK_URL'"}' \
             https://api.render.com/v1/env-groups/${{ secrets.ENV_GROUP_ID }}/env-vars/${{ secrets.ENV_VAR_KEY }}
+          if [ $? -ne 0 ]; then
+            echo "Error updating environment variable on Render.com"
+            exit 1
+          fi
 
       - name: Trigger Deployment on Render.com
         run: |
@@ -49,3 +79,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"clearCache": "do_not_clear"}' \
             https://api.render.com/v1/services/${{ secrets.SERVICE_ID }}/deploys
+          if [ $? -ne 0 ]; then
+            echo "Error triggering deployment on Render.com"
+            exit 1
+          fi
