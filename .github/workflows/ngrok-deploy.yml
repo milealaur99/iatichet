@@ -30,7 +30,7 @@ jobs:
           npm install ts-node typescript dotenv express mongoose apollo-server-express socket.io http swagger-ui-express @types/node --save-dev
 
       - name: Run Docker Compose
-        run: docker-compose up --build -d backend
+        run: docker-compose up --build backend
 
       - name: Wait for Backend Health Check
         run: |
