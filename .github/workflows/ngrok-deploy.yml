@@ -1,11 +1,9 @@
 name: Deploy Backend and Frontend
 
-# Define events to trigger this workflow
 on:
   push:
     branches:
       - master
-  workflow_dispatch: # Enables manual triggering of the workflow from GitHub UI
 
 jobs:
   deploy:
@@ -18,9 +16,11 @@ jobs:
       - name: Install Docker Compose
         run: sudo apt-get install -y docker-compose
 
-      - name: Install Ngrok
+      - name: Download and Install Ngrok
         run: |
-          sudo apt-get install ngrok
+          wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+          unzip ngrok-stable-linux-amd64.zip
+          sudo mv ngrok /usr/local/bin/
           ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
       - name: Run Docker Compose
