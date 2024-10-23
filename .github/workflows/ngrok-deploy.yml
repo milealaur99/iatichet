@@ -1,9 +1,11 @@
 name: Deploy Backend and Frontend
 
+# Define events to trigger this workflow
 on:
   push:
     branches:
-      - main
+      - master
+  workflow_dispatch: # Enables manual triggering of the workflow from GitHub UI
 
 jobs:
   deploy:
