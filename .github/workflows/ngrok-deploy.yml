@@ -24,7 +24,16 @@ jobs:
           ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
       - name: Run Docker Compose
-        run: docker-compose up --build backend
+        run: docker-compose up --build -d
+
+      - name: Install Backend Dependencies
+        run: |
+          docker-compose exec backend npm install
+          docker-compose exec backend npm install ts-node typescript --save-dev
+          docker-compose exec backend npm install
+
+      - name: Start Backend
+        run: docker-compose exec backend npm run dev
 
       - name: Wait for Backend and Ngrok to Start
         run: |
@@ -33,7 +42,6 @@ jobs:
 
       - name: Check if Ngrok is Running and Fetch URL
         run: |
-          # Retry until the Ngrok URL is available
           RETRIES=10
           while [ $RETRIES -gt 0 ]; do
             NGROK_URL=$(curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
