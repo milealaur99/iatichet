@@ -24,7 +24,7 @@ jobs:
           ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
       - name: Run Docker Compose
-        run: docker-compose up --build backend
+        run: docker-compose up --build -d
 
       - name: Wait for Backend and Ngrok to Start
         run: |
@@ -34,7 +34,8 @@ jobs:
       - name: Install Backend Dependencies
         run: |
           docker-compose exec -T backend npm install
-          docker-compose exec -T backend npm install ts-node typescript --save-dev
+          docker-compose exec -T backend npm install ts-node typescript dotenv express mongoose apollo-server-express socket.io http swagger-ui-express @types/node --save-dev
+          docker-compose exec -T backend npm install
 
       - name: Check if Ngrok is Running and Fetch URL
         run: |
