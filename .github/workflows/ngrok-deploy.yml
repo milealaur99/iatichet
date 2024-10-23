@@ -24,7 +24,7 @@ jobs:
           ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
       - name: Run Docker Compose
-        run: docker-compose up --build backend
+        run: docker-compose up --build -d backend
 
       - name: Wait for Backend and Ngrok to Start
         run: |
