@@ -30,24 +30,25 @@ jobs:
           npm install ts-node typescript dotenv express mongoose apollo-server-express socket.io http swagger-ui-express @types/node --save-dev
 
       - name: Run Docker Compose (Without -d)
-        run: docker-compose up --build backend
+        run: docker-compose up --build -d backend
 
-      - name: Wait for Backend to Start (Non-Blocking Check)
+      - name: Wait for Backend to Start (Health Check)
         run: |
           echo "Checking if backend is ready..."
-          RETRIES=10
+          RETRIES=100
           BACKEND_READY=0
-          until $(curl --output /dev/null --silent --head --fail http://localhost:5000); do
+          until $(curl --output /dev/null --silent --head --fail http://localhost:5000/api/events) && curl -s http://localhost:5000/api/events | grep -q "OK"; do
             if [ $RETRIES -eq 0 ]; then
               echo "Backend did not become ready in time."
               exit 1
             fi
-            echo "Backend not available yet. Retrying..."
+            echo "Backend not available yet or health check failed. Retrying..."
             RETRIES=$((RETRIES-1))
             sleep 5
           done
           echo "Backend is up and running."
           BACKEND_READY=1
+
         continue-on-error: true
 
       - name: Check if Ngrok is Running and Fetch URL
