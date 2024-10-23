@@ -28,12 +28,12 @@ jobs:
 
       - name: Install Backend Dependencies
         run: |
-          docker-compose exec backend npm install
-          docker-compose exec backend npm install ts-node typescript --save-dev
-          docker-compose exec backend npm install
+          docker-compose exec -T backend npm install
+          docker-compose exec -T backend npm install ts-node typescript --save-dev
+          docker-compose exec -T backend npm install
 
       - name: Start Backend
-        run: docker-compose exec backend npm run dev
+        run: docker-compose exec -T backend npm run dev
 
       - name: Wait for Backend and Ngrok to Start
         run: |
