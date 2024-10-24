@@ -23,55 +23,35 @@ jobs:
           sudo mv ngrok /usr/local/bin/
           ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
-      - name: Install Backend Dependencies
-        run: |
-          cd backend
-          npm install
-          npm install ts-node typescript dotenv express mongoose apollo-server-express socket.io http swagger-ui-express @types/node --save-dev
-
-      - name: Run Docker Compose (Without -d)
+      - name: Run Docker Compose
         run: docker-compose up --build -d backend
 
-      - name: Wait for Backend to Start (Health Check)
+      - name: Wait for Backend to Start (via Health Check)
         run: |
-          echo "Checking if backend is ready..."
-          RETRIES=100
-          BACKEND_READY=0
-          until $(curl --output /dev/null --silent --head --fail http://localhost:5000/api/events) && curl -s http://localhost:5000/api/events | grep -q "OK"; do
-            if [ $RETRIES -eq 0 ]; then
-              echo "Backend did not become ready in time."
-              exit 1
-            fi
-            echo "Backend not available yet or health check failed. Retrying..."
-            RETRIES=$((RETRIES-1))
-            sleep 5
-          done
-          echo "Backend is up and running."
-          BACKEND_READY=1
-
-        continue-on-error: true
-
-      - name: Check if Ngrok is Running and Fetch URL
-        run: |
-          # Retry until the Ngrok URL is available
+          echo "Waiting for backend to be healthy..."
           RETRIES=10
           while [ $RETRIES -gt 0 ]; do
-            NGROK_URL=$(curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
-            if [ -n "$NGROK_URL" ]; then
-              echo "Ngrok URL fetched successfully: $NGROK_URL"
-              echo "NGROK_URL=${NGROK_URL}" >> $GITHUB_ENV
+            STATUS=$(docker-compose ps | grep "backend" | grep "healthy")
+            if [ -n "$STATUS" ]; then
+              echo "Backend is healthy!"
               break
             else
-              echo "Ngrok URL not available yet. Retrying..."
+              echo "Backend not healthy yet. Retrying..."
               RETRIES=$((RETRIES-1))
-              sleep 5
+              sleep 10
             fi
           done
 
-          if [ -z "$NGROK_URL" ]; then
-            echo "Error: Could not fetch Ngrok URL."
+          if [ $RETRIES -eq 0 ]; then
+            echo "Error: Backend did not become healthy in time."
             exit 1
           fi
+
+      - name: Fetch Ngrok URL
+        run: |
+          NGROK_URL=$(curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+          echo "NGROK_URL=${NGROK_URL}" >> $GITHUB_ENV
+          echo "Fetched Ngrok URL: $NGROK_URL"
 
       - name: Update Env Var in Frontend's .env file
         run: |
@@ -87,10 +67,6 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"value": "'$NGROK_URL'"}' \
             https://api.render.com/v1/env-groups/${{ secrets.ENV_GROUP_ID }}/env-vars/${{ secrets.ENV_VAR_KEY }}
-          if [ $? -ne 0 ]; then
-            echo "Error updating environment variable on Render.com"
-            exit 1
-          fi
 
       - name: Trigger Deployment on Render.com
         run: |
@@ -99,7 +75,3 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"clearCache": "do_not_clear"}' \
             https://api.render.com/v1/services/${{ secrets.SERVICE_ID }}/deploys
-          if [ $? -ne 0 ]; then
-            echo "Error triggering deployment on Render.com"
-            exit 1
-          fi
