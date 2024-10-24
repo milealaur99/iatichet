@@ -1,0 +1,77 @@
+name: Deploy Backend and Frontend
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Docker Compose
+        run: sudo apt-get install -y docker-compose
+
+      - name: Download and Install Ngrok
+        run: |
+          wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+          unzip ngrok-stable-linux-amd64.zip
+          sudo mv ngrok /usr/local/bin/
+          ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
+
+      - name: Run Docker Compose
+        run: docker-compose up --build -d backend
+
+      - name: Wait for Backend to Start (via Health Check)
+        run: |
+          echo "Waiting for backend to be healthy..."
+          RETRIES=10
+          while [ $RETRIES -gt 0 ]; do
+            STATUS=$(docker-compose ps | grep "backend" | grep "healthy")
+            if [ -n "$STATUS" ]; then
+              echo "Backend is healthy!"
+              break
+            else
+              echo "Backend not healthy yet. Retrying..."
+              RETRIES=$((RETRIES-1))
+              sleep 10
+            fi
+          done
+
+          if [ $RETRIES -eq 0 ]; then
+            echo "Error: Backend did not become healthy in time."
+            exit 1
+          fi
+
+      - name: Fetch Ngrok URL
+        run: |
+          NGROK_URL=$(curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+          echo "NGROK_URL=${NGROK_URL}" >> $GITHUB_ENV
+          echo "Fetched Ngrok URL: $NGROK_URL"
+
+      - name: Update Env Var in Frontend's .env file
+        run: |
+          echo "REACT_APP_BACKEND_URL=${NGROK_URL}" > ./frontend/event-management/.env
+          echo "Updated REACT_APP_BACKEND_URL in .env to $NGROK_URL"
+          cat ./frontend/event-management/.env
+
+      - name: Update Env Var on Render.com
+        run: |
+          echo "Updating Render.com environment variable with Ngrok URL: $NGROK_URL"
+          curl -X PUT \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"value": "'$NGROK_URL'"}' \
+            https://api.render.com/v1/env-groups/${{ secrets.ENV_GROUP_ID }}/env-vars/${{ secrets.ENV_VAR_KEY }}
+
+      - name: Trigger Deployment on Render.com
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": "do_not_clear"}' \
+            https://api.render.com/v1/services/${{ secrets.SERVICE_ID }}/deploys

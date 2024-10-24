@@ -5,6 +5,7 @@ import {
   getReservationById,
   deleteReservation,
   getUserReservations,
+  cancelPendingReservations
 } from "../controllers/reservationControler";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { cacheMiddleware } from "../middlewares/caheRedisMiddleware";
@@ -12,14 +13,10 @@ import { cacheMiddleware } from "../middlewares/caheRedisMiddleware";
 const router = Router();
 
 router.post("/create", authMiddleware, createReservation);
-router.get("/", cacheMiddleware, getAllReservations);
-router.get(
-  "/user/:userId",
-  authMiddleware,
-  cacheMiddleware,
-  getUserReservations
-);
-router.get("/:id", getReservationById);
+router.get("/", cacheMiddleware, authMiddleware, getAllReservations);
+router.get("/user/:userId", authMiddleware, getUserReservations);
+router.get("/:id", authMiddleware, getReservationById);
 router.delete("/:id", authMiddleware, deleteReservation);
+router.put("/cancel/:id", authMiddleware, cancelPendingReservations);
 
-export default router;
+export { router };

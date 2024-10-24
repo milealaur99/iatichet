@@ -1,45 +1,65 @@
 import path from "path";
-import stripe from "../services/stripe";
 import ReservationModel, { Reservation } from "../models/Reservation";
 import Event, { Event as EventType } from "../models/Event";
 import { generateReservationPDF } from "../utils/pdfGenerator";
-import { getAsync, setAsync } from "../utils/redisUtils";
+import { timeoutStorage, getAsync, setAsync } from "../utils/redisUtils";
 import { Request, Response } from "express";
-import { set } from "lodash";
+import Stripe from "stripe";
 
 export const createCheckoutSession = async (req: Request, res: Response) => {
-  const { reservation } = req.body as { reservation: Reservation };
-  if (!stripe) {
-    return res.status(500).json({ message: "Stripe not initialized" });
-  }
-  const successUrl = `${req.protocol}://${req.get("host")}/success`;
-  const cancelUrl = `${req.protocol}://${req.get("host")}/cancel`;
+  try {
+    const { reservation } = req.body as { reservation: Reservation };
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
-  const event = await Event.findById(reservation.event);
-  if (!event) {
-    return res.status(404).json({ message: "Event not found" });
-  }
+    if (!stripe) {
+      return res.status(500).json({ message: "Stripe not initialized" });
+    }
+    const successUrl = `${req.protocol}://${req.get(
+      "host"
+    )}/api/payment/success?reservationId=${reservation._id}`;
+    const cancelUrl = `${req.protocol}://${req.get(
+      "host"
+    )}/api/payment/cancel?reservationId=${reservation._id}`;
+    const event = await Event.findById(reservation.event);
 
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    line_items: [
-      {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: event.name,
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "RON",
+            product_data: {
+              name: event.name,
+            },
+            unit_amount: event.tichetPrice * 100,
           },
-          unit_amount: reservation.price * 100,
+          quantity: reservation.seats.length,
         },
-        quantity: reservation.seats.length,
-      },
-    ],
-    mode: "payment",
-    success_url: successUrl,
-    cancel_url: cancelUrl,
-  });
+      ],
+      mode: "payment",
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      expires_at: Math.floor(Date.now() / 1000) + 1800,
+    });
 
-  res.json({ id: session.id });
+    const reservationModel: Reservation | null =
+      await ReservationModel.findById(reservation._id);
+    if (!reservationModel || !session.url) {
+      return res.status(404).json({ message: "Reservation not found" });
+    }
+
+    reservationModel.paymentLink = session.url;
+
+    await reservationModel.save();
+
+    res.json({ id: session.id, url: session.url });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 export const success = async (
@@ -51,79 +71,108 @@ export const success = async (
   },
   res: Response
 ) => {
-  const { reservation } = req.body as { reservation: Reservation };
+  try {
+    const { reservationId } = req.query;
 
-  const pdfPath = path.join(
-    __dirname,
-    "..",
-    "..",
-    "public",
-    "pdfs",
-    `${reservation.id}.pdf`
-  );
-
-  const eventModel: EventType | null = await Event.findById(reservation.event);
-  const seats = reservation.seats;
-
-  if (!eventModel || !seats) {
-    return res.status(404).json({ message: "Event not found" });
-  }
-
-  for (const seat of seats) {
-    const hallSeat = eventModel.seats.find(
-      (s) => s.row === seat.row && s.number === seat.number
+    const reservation: Reservation | null = await ReservationModel.findById(
+      reservationId
     );
-    if (hallSeat && reservation.id) {
-      hallSeat.reservationOps = {
-        isReserved: true,
-        reservation: reservation.id.toString(),
-      };
+
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservation not found" });
     }
+
+    const pdfPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "pdfs",
+      `${(reservation._id as string).toString()}.pdf`
+    );
+    const eventModel: EventType | null = await Event.findById(
+      reservation.event
+    );
+    const seats = reservation.seats;
+
+    if (!eventModel || !seats) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    for (const seat of seats) {
+      const hallSeat = {
+        reservationOps: {
+          isReserved: true,
+          reservation: (reservation._id as string).toString(),
+        },
+        row: seat.row,
+        number: seat.number,
+        reservation: (reservation._id as string).toString(),
+      };
+
+      eventModel.seats.push(hallSeat);
+    }
+
+    reservation.isPaid = true;
+
+    await eventModel.save();
+    await reservation.save();
+
+    const restoreSeatsForUnpaidReservations = `restoreSeatsForUnpaidReservations-${reservation.user.toString()}`;
+
+    clearTimeout(timeoutStorage.get(restoreSeatsForUnpaidReservations));
+    timeoutStorage.delete(restoreSeatsForUnpaidReservations);
+
+    const currentReservations = (await getAsync(
+      "/api/reservations"
+    )) as Reservation[];
+
+    if (currentReservations) {
+      await setAsync({
+        key: "/api/reservations",
+        value: [...currentReservations, reservation],
+      });
+    } else {
+      await setAsync({
+        key: "/api/reservations",
+        value: await ReservationModel.find(),
+      });
+    }
+
+    const userReservations = (await getAsync(
+      `/api/reservations/${reservation.user.toString()}`
+    )) as Reservation[];
+
+    if (userReservations) {
+      await setAsync({
+        key: `/api/reservations/${reservation.user.toString()}`,
+        value: [...userReservations, reservation],
+      });
+    } else {
+      await setAsync({
+        key: `/api/reservations/${reservation.user.toString()}`,
+        value: await ReservationModel.find({
+          user: reservation.user.toString(),
+        }),
+      });
+    }
+
+    const currentEvent = (await getAsync(
+      `/api/events/${reservation.event.toString()}`
+    )) as EventType;
+
+    await setAsync({
+      key: `/api/events/${reservation.event.toString()}`,
+      value: { ...currentEvent, seats: eventModel.seats },
+    });
+
+    await generateReservationPDF(reservation, pdfPath);
+
+    res.redirect(
+      `${process.env.REACT_APP_FRONTEND_URL}/success/${reservation._id}?eventId=${reservation.event}`
+    );
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
   }
-
-  await eventModel.save();
-  await reservation.save();
-
-  const currentReservations = (await getAsync(
-    "/api/reservations"
-  )) as Reservation[];
-
-  if (currentReservations) {
-    await setAsync({
-      key: "/api/reservations",
-      value: [...currentReservations, reservation],
-    });
-  } else {
-    await setAsync({
-      key: "/api/reservations",
-      value: await ReservationModel.find(),
-    });
-  }
-
-  const userReservations = (await getAsync(
-    `/api/reservations/${req?.user?.id}`
-  )) as Reservation[];
-
-  if (userReservations) {
-    await setAsync({
-      key: `/api/reservations/${req?.user?.id}`,
-      value: [...userReservations, reservation],
-    });
-  } else {
-    await setAsync({
-      key: `/api/reservations/${req?.user?.id}`,
-      value: await ReservationModel.find({ user: req?.user?.id }),
-    });
-  }
-
-  await generateReservationPDF(reservation, pdfPath);
-
-  res.download(pdfPath);
-
-  res.status(201).json({
-    message: "Reservation created successfully",
-    reservation,
-  });
 };
 
 export const cancel = async (
@@ -135,9 +184,13 @@ export const cancel = async (
   },
   res: Response
 ) => {
-  const { reservation } = req.body as { reservation: Reservation };
-  const reservationModel = await ReservationModel.findById(reservation.id);
-  if (!reservationModel) {
+  const { reservationId } = req.query;
+
+  const reservation: Reservation | null = await ReservationModel.findById(
+    reservationId
+  );
+
+  if (!reservation) {
     return res.status(404).json({ message: "Reservation not found" });
   }
 
@@ -147,21 +200,21 @@ export const cancel = async (
 
   if (currentReservations) {
     const updatedReservations = currentReservations.filter(
-      (r) => r.id !== reservation.id
+      (r) => r.id !== reservationId
     );
     await setAsync({ key: "/api/reservations", value: updatedReservations });
   }
 
   const userReservations = (await getAsync(
-    `/api/reservations/${req?.user?.id}`
+    `/api/reservations/${reservation.user.toString()}`
   )) as Reservation[];
 
   if (userReservations) {
     const updatedUserReservations = userReservations.filter(
-      (r) => r.id !== reservation.id
+      (r) => r.id !== reservationId
     );
     await setAsync({
-      key: `/api/reservations/${req?.user?.id}`,
+      key: `/api/reservations/${reservation.user.toString()}`,
       value: updatedUserReservations,
     });
   }
@@ -183,12 +236,52 @@ export const cancel = async (
     }
   }
   await event.save();
-  await ReservationModel.findByIdAndDelete(reservation.id);
+  await ReservationModel.findByIdAndDelete(reservationId);
+
+  const restoreSeatsForUnpaidReservations = `restoreSeatsForUnpaidReservations-${reservation.user.toString()}`;
+
+  clearTimeout(timeoutStorage.get(restoreSeatsForUnpaidReservations));
+  timeoutStorage.delete(restoreSeatsForUnpaidReservations);
 
   await setAsync({
     key: `/api/events/${reservation.event}`,
     value: event,
   });
 
-  res.status(200).json({ message: "Reservation canceled" });
+  res.redirect(
+    `${process.env.REACT_APP_FRONTEND_URL}/cancel/${reservation._id}?eventId=${reservation.event}`
+  );
+};
+
+export const downloadPDFReservation = async (
+  req: Request & {
+    user?: { id: string; username: string; password: string };
+    body: {
+      reservation: Reservation;
+    };
+  },
+  res: Response
+) => {
+  try {
+    const { reservationId } = req.query;
+
+    const reservation: Reservation | null = await ReservationModel.findById(
+      reservationId
+    );
+
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservation not found" });
+    }
+    const pdfPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "pdfs",
+      `${reservation._id}.pdf`
+    );
+
+    res.download(pdfPath, `${reservation._id}.pdf`);
+  } catch (error) {
+    res.status(500).json({ message: "File not found" });
+  }
 };

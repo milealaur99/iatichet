@@ -1,0 +1,413 @@
+openapi: 3.0.0
+info:
+  title: Reservations API
+  version: 1.0.0
+  description: API routes for managing reservations.
+
+tags:
+  - name: Reservations
+    description: Routes related to event reservations.
+
+paths:
+  /api/reservations/create:
+    post:
+      tags:
+        - Reservations
+      summary: Create a new reservation
+      description: Allows a user to create a new reservation. Requires authentication.
+      security:
+        - bearerAuth: [] # Requires authentication with JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventId:
+                  type: string
+                  description: The ID of the event to reserve seats for
+                  example: "605c72b2f1a5b203d4a12345"
+                seats:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      row:
+                        type: string
+                        description: The row of the seat
+                        example: "A"
+                      number:
+                        type: integer
+                        description: The seat number
+                        example: 5
+      responses:
+        "201":
+          description: Reservation created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reservation created successfully"
+                  reservation:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        description: Reservation ID
+                        example: "605c72b2f1a5b203d4a67890"
+        "400":
+          description: Bad Request - Error creating reservation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error creating reservation"
+
+  /api/reservations:
+    get:
+      tags:
+        - Reservations
+      summary: Get all reservations
+      description: Fetches all reservations with pagination. Requires authentication.
+      security:
+        - bearerAuth: [] # Requires authentication with JWT
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination (10 reservations per page)
+          required: false
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: Reservations fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reservations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                          description: Reservation ID
+                          example: "605c72b2f1a5b203d4a67890"
+                        event:
+                          type: string
+                          description: Event ID
+                          example: "605c72b2f1a5b203d4a12345"
+                        hall:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              description: Hall name
+                              example: "Main Hall"
+                        seats:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              row:
+                                type: string
+                                description: The row of the seat
+                                example: "A"
+                              number:
+                                type: integer
+                                description: The seat number
+                                example: 5
+                        price:
+                          type: number
+                          description: The total price for the reservation
+                          example: 5000
+                        date:
+                          type: string
+                          description: Date of the reservation creation
+                          example: "2023-12-01T10:30:00.000Z"
+                  totalPages:
+                    type: integer
+                    description: Total number of pages based on the number of reservations
+                    example: 5
+                  page:
+                    type: integer
+                    description: The current page number
+                    example: 1
+        "400":
+          description: Bad Request - Error fetching reservations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error fetching reservations"
+
+  /api/reservations/user/{userId}:
+    get:
+      tags:
+        - Reservations
+      summary: Get reservations for a user
+      description: Fetches all reservations for a specific user. Requires authentication.
+      security:
+        - bearerAuth: [] # Requires authentication with JWT
+      parameters:
+        - name: userId
+          in: path
+          description: The ID of the user whose reservations are being fetched
+          required: true
+          schema:
+            type: string
+            example: "605c72b2f1a5b203d4a12345"
+      responses:
+        "200":
+          description: Reservations fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reservations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        eventName:
+                          type: string
+                          description: The name of the event
+                          example: "Music Concert"
+                        eventId:
+                          type: string
+                          description: The ID of the event
+                          example: "605c72b2f1a5b203d4a67890"
+                        hall:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              description: Hall name
+                              example: "Main Hall"
+                        seats:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              row:
+                                type: string
+                                description: The row of the seat
+                                example: "A"
+                              number:
+                                type: integer
+                                description: The seat number
+                                example: 5
+                        price:
+                          type: number
+                          description: The total price for the reservation
+                          example: 5000
+        "403":
+          description: Forbidden - You do not have access to this user's reservations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Forbidden access"
+
+  /api/reservations/{id}:
+    get:
+      tags:
+        - Reservations
+      summary: Get a reservation by ID
+      description: Fetches a single reservation by its ID. Requires authentication.
+      security:
+        - bearerAuth: [] # Requires authentication with JWT
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the reservation
+          required: true
+          schema:
+            type: string
+            example: "605c72b2f1a5b203d4a12345"
+      responses:
+        "200":
+          description: Reservation fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                    description: Reservation ID
+                    example: "605c72b2f1a5b203d4a67890"
+                  user:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        description: User ID
+                        example: "605c72b2f1a5b203d4a12345"
+                      username:
+                        type: string
+                        description: Username of the user who made the reservation
+                        example: "john_doe"
+                  hall:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: Hall name
+                        example: "Main Hall"
+                  seats:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        row:
+                          type: string
+                          description: The row of the seat
+                          example: "A"
+                        number:
+                          type: integer
+                          description: The seat number
+                          example: 5
+                  price:
+                    type: number
+                    description: The total price for the reservation
+                    example: 5000
+        "404":
+          description: Not Found - Reservation not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reservation not found"
+
+    delete:
+      tags:
+        - Reservations
+      summary: Delete a reservation by ID
+      description: Deletes a reservation by its ID. Requires authentication.
+      security:
+        - bearerAuth: [] # Requires authentication with JWT
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the reservation to delete
+          required: true
+          schema:
+            type: string
+            example: "605c72b2f1a5b203d4a12345"
+      responses:
+        "200":
+          description: Reservation deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reservation deleted successfully"
+        "403":
+          description: Forbidden - You do not have access to delete this reservation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Forbidden access"
+        "404":
+          description: Not Found - Reservation or event not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reservation not found"
+
+  /api/reservations/cancel/{id}:
+    put:
+      tags:
+        - Reservations
+      summary: Cancel a pending reservation by ID
+      description: Cancels a pending reservation by its ID. Requires authentication.
+      security:
+        - bearerAuth: [] # Requires authentication with JWT
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the reservation to cancel
+          required: true
+          schema:
+            type: string
+            example: "605c72b2f1a5b203d4a12345"
+      responses:
+        "200":
+          description: Reservation canceled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reservation canceled"
+        "403":
+          description: Forbidden - You do not have access to cancel this reservation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Forbidden access"
+        "404":
+          description: Not Found - Reservation or event not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reservation not found"
+        "400":
+          description: Bad Request - Error canceling reservation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error canceling reservations"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

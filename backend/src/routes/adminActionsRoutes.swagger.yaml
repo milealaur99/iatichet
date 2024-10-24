@@ -1,0 +1,322 @@
+openapi: 3.0.0
+info:
+  title: Admin Actions
+  version: 1.0.0
+  description: API routes for administrative actions.
+
+tags:
+  - name: Admin
+    description: Admin related routes
+
+paths:
+  /api/admin/users:
+    get:
+      tags:
+        - Admin
+      summary: Get All Users
+      description: Retrieve all users in the system. Requires admin role.
+      security:
+        - bearerAuth: [] # Requires authentication with JWT
+      responses:
+        "200":
+          description: OK - List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                      description: User ID
+                      example: "605c72b2f1a5b203d4a12345"
+                    username:
+                      type: string
+                      description: Username of the user
+                      example: "admin"
+                    email:
+                      type: string
+                      description: Email of the user
+                      example: "admin@example.com"
+                    role:
+                      type: string
+                      description: Role of the user
+                      example: "admin"
+        "401":
+          description: Unauthorized - No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Access denied. No token provided."
+        "403":
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        "404":
+          description: Not Found - No users found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Users not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+  /api/users/{id}:
+    put:
+      tags:
+        - Admin
+      summary: Change User Role
+      description: Allows an admin to change the role of a user.
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the user whose role is being changed
+          required: true
+          schema:
+            type: string
+            example: "605c72b2f1a5b203d4a12345"
+      security:
+        - bearerAuth: [] # Requires authentication with JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  description: New role for the user
+                  example: "admin"
+      responses:
+        "200":
+          description: OK - User role changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Role changed successfully"
+        "401":
+          description: Unauthorized - No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Access denied. No token provided."
+        "403":
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        "404":
+          description: Not Found - User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+  /api/admin/find-users/{username}:
+    get:
+      tags:
+        - Admin
+      summary: Find Users by Username
+      description: Retrieve a list of users based on a partial or complete username match. Requires admin role.
+      parameters:
+        - name: username
+          in: path
+          description: The username (or part of the username) to search for
+          required: true
+          schema:
+            type: string
+            example: "john"
+      security:
+        - bearerAuth: [] # Requires authentication with JWT
+      responses:
+        "200":
+          description: OK - Users found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                      description: User ID
+                      example: "605c72b2f1a5b203d4a12345"
+                    username:
+                      type: string
+                      description: Username of the user
+                      example: "john_doe"
+                    email:
+                      type: string
+                      description: Email of the user
+                      example: "john@example.com"
+                    role:
+                      type: string
+                      description: Role of the user
+                      example: "user"
+        "401":
+          description: Unauthorized - No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Access denied. No token provided."
+        "403":
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        "404":
+          description: Not Found - No users found matching the search criteria
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Users not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+  /api/admin/users/{id}:
+    delete:
+      tags:
+        - Admin
+      summary: Delete User
+      description: Allows an admin to delete a user.
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the user to delete
+          required: true
+          schema:
+            type: string
+            example: "605c72b2f1a5b203d4a12345"
+      security:
+        - bearerAuth: [] # Requires authentication with JWT
+      responses:
+        "200":
+          description: OK - User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User deleted successfully"
+        "401":
+          description: Unauthorized - No token provided or invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Access denied. No token provided."
+        "403":
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized"
+        "404":
+          description: Not Found - User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

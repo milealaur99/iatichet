@@ -5,14 +5,17 @@ import {
   createCheckoutSession,
   success,
   cancel,
+  downloadPDFReservation,
 } from "../controllers/paymentController";
 
 const router = Router();
 
-router.post("/create-checkout-session", authMiddleware, createCheckoutSession);
+router.post("/create-checkout-session", createCheckoutSession);
 
-router.get("/success", authMiddleware, success);
+router.get("/success", success);
 
-router.get("/cancel", authMiddleware, cancel);
+router.get("/cancel", cancel);
 
-export default router;
+router.get('/download-reservation',downloadPDFReservation );
+
+export  {router};

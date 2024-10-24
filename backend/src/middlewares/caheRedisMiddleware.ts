@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import redisClient from "../config/redis";
 import { AppError } from "./errorMiddleware";
+import { setAsync, getAsync } from "../utils/redisUtils";
 
 declare global {
   namespace Express {
@@ -16,15 +16,14 @@ export const cacheMiddleware = async (
   next: NextFunction
 ) => {
   const key = req.originalUrl || req.url;
-
   try {
-    const cachedData = await redisClient.get(key);
+    const cachedData = await getAsync(key);
     if (cachedData) {
-      res.send(JSON.parse(cachedData));
+      res.send(cachedData);
     } else {
       res.sendResponse = res.send;
       res.send = (body) => {
-        redisClient.setEx(key, 3600, JSON.stringify(body));
+        setAsync({ key, value: body });
         const response = res.sendResponse && res.sendResponse(body);
         return response ?? res.send(body);
       };
