@@ -17,6 +17,11 @@ services:
       - backend
       - redis
       - mongo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/events"]
+      interval: 10s
+      timeout: 5s
+      retries: 100
     # Remove the 'develop' section and rely on volumes for live syncing
 
   backend:
