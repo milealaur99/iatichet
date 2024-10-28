@@ -23,12 +23,8 @@ jobs:
           sudo mv ngrok /usr/local/bin/
           ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
-      - name: Run Backend in Detached Mode
-        run: docker-compose up --build -d backend
-
-      - name: Stream Backend Logs
-        run: docker-compose logs -f backend &
-        # The "&" allows the logs to stream in the background
+      - name: Run Docker Compose
+        run: docker-compose up --build backend
 
       - name: Wait for Backend to Start (via Health Check)
         run: |
