@@ -3,9 +3,6 @@ version: "3.8"
 services:
   frontend:
     build: ./frontend/event-management
-    volumes:
-      - ./frontend/event-management:/app
-      - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
@@ -15,31 +12,30 @@ services:
       - "3000:3000"
     depends_on:
       - backend
-      - redis
-      - mongo
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/api/events"]
-      interval: 10s
-      timeout: 5s
-      retries: 100
-    # Remove the 'develop' section and rely on volumes for live syncing
+      - ngrok
 
   backend:
     build: ./backend
-    volumes:
-      - ./backend/uploads:/backend/uploads
-      - ./backend/pdfs:/backend/pdfs
-      - ./backend/assets:/backend/assets
-      - ./backend:/backend
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     ports:
       - "5000:5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ngrok:
+    image: ngrok/ngrok
+    command: http backend:5000
+    environment:
+      - NGROK_AUTHTOKEN=2nWnlou7c6TWCiPmvlabD7STo9S_5qUF9NaFkfkdrvCs4wV8K
+    ports:
+      - "4040:4040" # Exposes the Ngrok web interface for monitoring
     depends_on:
-      - redis
-      - mongo
-    # Remove the 'develop' section and rely on volumes for live syncing
+      - backend
 
   mongo:
     image: mongo:latest

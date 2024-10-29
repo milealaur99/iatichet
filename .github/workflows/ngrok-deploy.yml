@@ -13,54 +13,49 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Backend Dependencies
-        run: |
-          cd backend
-          npm install
+      - name: Set up Docker Compose
+        run: sudo apt-get install -y docker-compose
 
-      - name: Run Docker Compose with Health Check
-        uses: hoverkraft-tech/compose-action@v2.0.1
-        with:
-          compose-file: "./docker-compose.yml"
-          services: backend
-          up-flags: "--build"
+      - name: Start Services with Docker Compose
+        run: docker-compose up -d --build
 
-      - name: Wait for Backend to be Ready
+      - name: Wait for Backend to Start
         run: |
-          echo "Waiting for backend to be ready..."
-          RETRIES=70
-          while [ $RETRIES -gt 0 ]; do
-            STATUS=$(curl -s http://localhost:5000/health || echo "not_ready")
-            if [[ "$STATUS" == *"healthy"* ]]; then
-              echo "Backend is ready!"
-              break
-            else
-              echo "Backend not ready yet. Retrying..."
-              RETRIES=$((RETRIES-1))
-              sleep 10
+          echo "Waiting for backend to become healthy..."
+          RETRIES=23
+          until docker-compose exec backend curl -f http://localhost:5000/api/health; do
+            echo "Backend not healthy yet, retrying..."
+            RETRIES=$((RETRIES-1))
+            if [ $RETRIES -le 0 ]; then
+              echo "Backend did not become healthy in time."
+              exit 1
             fi
+            sleep 5
           done
 
-          if [ $RETRIES -eq 0 ]; then
-            echo "Error: Backend did not become ready in time."
-            exit 1
-          fi
-
-      - name: Expose Backend with Ngrok
-        uses: codetalkio/expose-tunnel@v1.5.0
-        with:
-          service: bore.pub
-          port: 5000
-        id: expose-tunnel
-
-      - name: Set NGROK_URL
-        run: echo "NGROK_URL=${{ steps.expose-tunnel.outputs.tunnel-url }}" >> $GITHUB_ENV
+      - name: Fetch Ngrok Public URL
+        run: |
+          echo "Fetching Ngrok URL..."
+          RETRIES=5
+          until [ "$NGROK_URL" != "" ]; do
+            NGROK_URL=$(curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+            if [ -z "$NGROK_URL" ]; then
+              echo "Ngrok URL not available yet, retrying..."
+              RETRIES=$((RETRIES-1))
+              if [ $RETRIES -le 0 ]; then
+                echo "Ngrok URL could not be fetched in time."
+                exit 1
+              fi
+              sleep 5
+            fi
+          done
+          echo "NGROK_URL=${NGROK_URL}" >> $GITHUB_ENV
+          echo "Fetched Ngrok URL: $NGROK_URL"
 
       - name: Update Env Var in Frontend's .env file
         run: |
           echo "REACT_APP_BACKEND_URL=${NGROK_URL}" > ./frontend/event-management/.env
           echo "Updated REACT_APP_BACKEND_URL in .env to $NGROK_URL"
-          cat ./frontend/event-management/.env
 
       - name: Update Env Var on Render.com
         run: |
@@ -78,12 +73,3 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"clearCache": "do_not_clear"}' \
             https://api.render.com/v1/services/${{ secrets.SERVICE_ID }}/deploys
-
-      - name: Capture Backend Logs
-        run: docker-compose logs backend > backend_logs.txt
-
-      - name: Upload Backend Logs
-        uses: actions/upload-artifact@v3
-        with:
-          name: backend-logs
-          path: backend_logs.txt

@@ -24,6 +24,10 @@ dotenv.config();
 const app: express.Express = express();
 const PORT = process.env.PORT || 5000;
 
+app.use("health", (req: Request, res: Response) => {
+  res.sendStatus(200);
+});
+
 setupSecurity({ app });
 
 app.use("/api/auth", authRoutes);
@@ -39,7 +43,7 @@ const apolloServer = new ApolloServer({
   resolvers,
   context: async ({
     req,
-    res
+    res,
   }: {
     req: Request & {
       user?: {
@@ -53,7 +57,7 @@ const apolloServer = new ApolloServer({
   }) => {
     await authMiddleware(req, res, () => {});
     return { user: req?.user };
-  }
+  },
 });
 
 const server = http.createServer(app);
@@ -70,7 +74,7 @@ mongoose
       apolloServer.applyMiddleware({
         // @ts-ignore
         app,
-        path: "/api/graphql"
+        path: "/api/graphql",
       });
     });
   })
