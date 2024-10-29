@@ -30,7 +30,7 @@ jobs:
         with:
           compose-file: "./docker-compose.yml"
           services: backend
-          up-flags: "--build -d"
+          up-flags: "--build"
 
       - name: Wait for Backend to Start
         run: |
