@@ -1,4 +1,4 @@
-name: Deploy Backend and Frontend
+name: Deploy Backend and Frontend with Ngrok Tunneling
 
 on:
   push:
@@ -13,8 +13,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Docker Compose
-        run: sudo apt-get install -y docker-compose
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
 
       - name: Download and Install Ngrok
         run: |
@@ -23,15 +25,14 @@ jobs:
           sudo mv ngrok /usr/local/bin/
           ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
-      - name: Install Backend Dependencies
-        run: |
-          docker-compose run backend npm install
-          docker-compose run backend npm install ts-node typescript --save-dev
-
       - name: Run Docker Compose
-        run: docker-compose up --build -d backend
+        uses: docker/compose-action@v2
+        with:
+          files: ./docker-compose.yml
+          services: backend
+          args: up -d --build
 
-      - name: Wait for Backend to Start (via Health Check)
+      - name: Wait for Backend to Start
         run: |
           echo "Waiting for backend to be healthy..."
           RETRIES=10
@@ -46,11 +47,15 @@ jobs:
               sleep 10
             fi
           done
-
           if [ $RETRIES -eq 0 ]; then
             echo "Error: Backend did not become healthy in time."
             exit 1
           fi
+
+      - name: Start Ngrok for localhost:5000
+        run: |
+          nohup ngrok http 5000 &
+          sleep 5 # Give ngrok some time to start
 
       - name: Fetch Ngrok URL
         run: |
