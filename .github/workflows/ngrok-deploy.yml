@@ -1,4 +1,4 @@
-name: Deploy Backend and Frontend with Ngrok Tunneling
+name: Deploy Backend and Frontend with Ngrok
 
 on:
   push:
@@ -11,12 +11,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
+        uses: actions/checkout@v4
 
       - name: Download and Install Ngrok
         run: |
@@ -24,33 +19,6 @@ jobs:
           unzip ngrok-stable-linux-amd64.zip
           sudo mv ngrok /usr/local/bin/
           ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
-
-      - name: Run Docker Compose
-        uses: docker/compose@v2
-        with:
-          compose-file: ./docker-compose.yml
-          workdir: ./backend
-          args: up -d --build backend
-
-      - name: Wait for Backend to Start
-        run: |
-          echo "Waiting for backend to be healthy..."
-          RETRIES=70
-          while [ $RETRIES -gt 0 ]; do
-            STATUS=$(docker-compose ps | grep "backend" | grep "healthy")
-            if [ -n "$STATUS" ]; then
-              echo "Backend is healthy!"
-              break
-            else
-              echo "Backend not healthy yet. Retrying..."
-              RETRIES=$((RETRIES-1))
-              sleep 10
-            fi
-          done
-          if [ $RETRIES -eq 0 ]; then
-            echo "Error: Backend did not become healthy in time."
-            exit 1
-          fi
 
       - name: Start Ngrok for localhost:5000
         run: |
@@ -62,6 +30,14 @@ jobs:
           NGROK_URL=$(curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
           echo "NGROK_URL=${NGROK_URL}" >> $GITHUB_ENV
           echo "Fetched Ngrok URL: $NGROK_URL"
+
+      - name: Run Docker Compose
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        with:
+          compose-file: "./docker/docker-compose.yml"
+          up-flags: "--build -d"
+        env:
+          REACT_APP_BACKEND_URL: ${{ env.NGROK_URL }}
 
       - name: Update Env Var in Frontend's .env file
         run: |
