@@ -24,7 +24,7 @@ dotenv.config();
 const app: express.Express = express();
 const PORT = process.env.PORT || 5000;
 
-app.use("health", (req: Request, res: Response) => {
+app.use("api/health", (req: Request, res: Response) => {
   res.sendStatus(200);
 });
 
