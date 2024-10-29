@@ -26,16 +26,16 @@ jobs:
           ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
       - name: Run Docker Compose
-        uses: docker/compose-action@v2
+        uses: docker/compose@v2
         with:
-          files: ./docker-compose.yml
-          services: backend
-          args: up -d --build
+          compose-file: ./docker-compose.yml
+          workdir: ./backend
+          args: up -d --build backend
 
       - name: Wait for Backend to Start
         run: |
           echo "Waiting for backend to be healthy..."
-          RETRIES=10
+          RETRIES=70
           while [ $RETRIES -gt 0 ]; do
             STATUS=$(docker-compose ps | grep "backend" | grep "healthy")
             if [ -n "$STATUS" ]; then
@@ -55,7 +55,7 @@ jobs:
       - name: Start Ngrok for localhost:5000
         run: |
           nohup ngrok http 5000 &
-          sleep 5 # Give ngrok some time to start
+          sleep 5
 
       - name: Fetch Ngrok URL
         run: |
