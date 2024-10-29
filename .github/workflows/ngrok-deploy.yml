@@ -16,7 +16,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y docker-compose jq curl
+          sudo apt-get install -y jq curl
 
       - name: Download and Install Ngrok
         run: |
@@ -25,16 +25,17 @@ jobs:
           sudo mv ngrok /usr/local/bin/
           ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
-      - name: Start Backend with Docker Compose
-        uses: docker/compose-action@v2.0.0
+      - name: Run Backend with Docker Compose
+        uses: hoverkraft-tech/compose-action@v2.0.1
         with:
           compose-file: "./docker-compose.yml"
-          up-flags: "--build -d backend"
+          services: backend
+          up-flags: "--build -d"
 
       - name: Wait for Backend to Start
         run: |
           echo "Waiting for backend to be accessible on port 5000..."
-          RETRIES=10
+          RETRIES=60
           until curl -s http://localhost:5000 > /dev/null; do
             echo "Backend not available yet. Retrying..."
             RETRIES=$((RETRIES-1))
