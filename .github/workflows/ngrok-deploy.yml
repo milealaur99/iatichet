@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "Waiting for backend to become healthy..."
           RETRIES=20
-          until docker-compose exec backend -T curl -f http://localhost:5000/api/health; do
+          until docker-compose exec -T backend curl -f http://localhost:5000/api/health; do
             echo "Backend not healthy yet, retrying..."
             RETRIES=$((RETRIES-1))
             if [ $RETRIES -le 0 ]; then
