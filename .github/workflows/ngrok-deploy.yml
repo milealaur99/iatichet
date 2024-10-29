@@ -23,8 +23,13 @@ jobs:
           sudo mv ngrok /usr/local/bin/
           ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
+      - name: Install Backend Dependencies
+        run: |
+          docker-compose run backend npm install
+          docker-compose run backend npm install ts-node typescript --save-dev
+
       - name: Run Docker Compose
-        run: docker-compose up --build backend
+        run: docker-compose up --build -d backend
 
       - name: Wait for Backend to Start (via Health Check)
         run: |
