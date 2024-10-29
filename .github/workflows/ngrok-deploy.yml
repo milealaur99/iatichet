@@ -13,34 +13,40 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Docker Compose
-        run: sudo apt-get install -y docker-compose
-
-      - name: Run Docker Compose
-        run: docker-compose up --build -d backend
-
-      - name: Wait for Backend to Start (via Health Check)
+      - name: Install Backend Dependencies
         run: |
-          echo "Waiting for backend to be healthy..."
-          RETRIES=10
+          cd backend
+          npm install
+
+      - name: Run Docker Compose with Health Check
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        with:
+          compose-file: "./docker-compose.yml"
+          services: backend
+          up-flags: "--build"
+
+      - name: Wait for Backend to be Ready
+        run: |
+          echo "Waiting for backend to be ready..."
+          RETRIES=70
           while [ $RETRIES -gt 0 ]; do
-            STATUS=$(docker-compose ps | grep "backend" | grep "healthy")
-            if [ -n "$STATUS" ]; then
-              echo "Backend is healthy!"
+            STATUS=$(curl -s http://localhost:5000/health || echo "not_ready")
+            if [[ "$STATUS" == *"healthy"* ]]; then
+              echo "Backend is ready!"
               break
             else
-              echo "Backend not healthy yet. Retrying..."
+              echo "Backend not ready yet. Retrying..."
               RETRIES=$((RETRIES-1))
               sleep 10
             fi
           done
 
           if [ $RETRIES -eq 0 ]; then
-            echo "Error: Backend did not become healthy in time."
+            echo "Error: Backend did not become ready in time."
             exit 1
           fi
 
-      - name: Expose Tunnel for Backend
+      - name: Expose Backend with Ngrok
         uses: codetalkio/expose-tunnel@v1.5.0
         with:
           service: bore.pub
@@ -75,8 +81,9 @@ jobs:
 
       - name: Capture Backend Logs
         run: docker-compose logs backend > backend_logs.txt
+
       - name: Upload Backend Logs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: backend-logs
           path: backend_logs.txt
