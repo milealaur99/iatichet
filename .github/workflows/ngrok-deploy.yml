@@ -1,4 +1,4 @@
-name: Deploy Backend and Frontend
+name: Deploy Backend and Frontend with Ngrok Logging
 
 on:
   push:
@@ -16,14 +16,21 @@ jobs:
       - name: Set up Docker Compose
         run: sudo apt-get install -y docker-compose
 
+      - name: Download and Install Ngrok
+        run: |
+          wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+          unzip ngrok-stable-linux-amd64.zip
+          sudo mv ngrok /usr/local/bin/
+          ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
+
       - name: Start Services with Docker Compose
         run: docker-compose up -d --build
 
       - name: Wait for Backend to Start
         run: |
           echo "Waiting for backend to become healthy..."
-          RETRIES=23
-          until curl -s http://localhost:5000/api/health; do
+          RETRIES=20
+          until docker-compose exec backend -T curl -f http://localhost:5000/api/health; do
             echo "Backend not healthy yet, retrying..."
             RETRIES=$((RETRIES-1))
             if [ $RETRIES -le 0 ]; then
@@ -34,16 +41,13 @@ jobs:
           done
 
       - name: Start Ngrok Tunnel
-        run: |
-          echo "Starting Ngrok tunnel..."
-          docker run -d --name ngrok --network="host" ngrok/ngrok http 5000
-          sleep 10
+        run: ngrok http 5000 --log=stdout > ngrok.log &
 
       - name: Fetch Ngrok Public URL
         run: |
           echo "Fetching Ngrok URL..."
           RETRIES=5
-          while [ "$NGROK_URL" == "" ]; do
+          until [ "$NGROK_URL" != "" ]; do
             NGROK_URL=$(curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
             if [ -z "$NGROK_URL" ]; then
               echo "Ngrok URL not available yet, retrying..."
@@ -79,3 +83,9 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"clearCache": "do_not_clear"}' \
             https://api.render.com/v1/services/${{ secrets.SERVICE_ID }}/deploys
+
+      # Keep the workflow running and continuously output Ngrok logs
+      - name: Keep GitHub Actions Job Alive with Ngrok Logging
+        run: |
+          echo "Keeping GitHub Actions job running to maintain Ngrok tunnel and log requests."
+          tail -f ngrok.log
