@@ -1,4 +1,4 @@
-name: Deploy Backend and Frontend with Ngrok Logging
+name: Deploy Backend and Frontend with Ngrok
 
 on:
   push:
@@ -16,10 +16,11 @@ jobs:
       - name: Set up Docker Compose
         run: sudo apt-get install -y docker-compose
 
-      - name: Download and Install Ngrok
+      - name: Download and Install Latest Ngrok
         run: |
-          wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
-          unzip ngrok-stable-linux-amd64.zip
+          echo "Downloading the latest version of Ngrok..."
+          wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip -O ngrok.zip
+          unzip ngrok.zip
           sudo mv ngrok /usr/local/bin/
           ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
 
@@ -84,7 +85,6 @@ jobs:
             -d '{"clearCache": "do_not_clear"}' \
             https://api.render.com/v1/services/${{ secrets.SERVICE_ID }}/deploys
 
-      # Keep the workflow running and continuously output Ngrok logs
       - name: Keep GitHub Actions Job Alive with Ngrok Logging
         run: |
           echo "Keeping GitHub Actions job running to maintain Ngrok tunnel and log requests."
