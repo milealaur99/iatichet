@@ -10,7 +10,7 @@ import {
   MenuItem,
   Box,
   Alert,
-  Stack
+  Stack,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -22,26 +22,26 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   borderRadius: "12px",
   padding: "30px",
   boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
-  minHeight: "100vh"
+  minHeight: "100vh",
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.primary.light,
   color: "#fff",
   "&:hover": {
-    backgroundColor: theme.palette.info.dark
-  }
+    backgroundColor: theme.palette.info.dark,
+  },
 }));
 
 const UploadButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.info.dark,
   color: "#fff",
   "&:hover": {
-    backgroundColor: theme.palette.info.main
+    backgroundColor: theme.palette.info.main,
   },
   display: "flex",
   alignItems: "center",
-  justifyContent: "center"
+  justifyContent: "center",
 }));
 
 export const EventForm: React.FC = () => {
@@ -123,7 +123,7 @@ export const EventForm: React.FC = () => {
           onChange={(e) => setDate(e.target.value)}
           margin="normal"
           InputLabelProps={{
-            shrink: true
+            shrink: true,
           }}
           required
           sx={{ backgroundColor: "#fff" }}
@@ -153,7 +153,7 @@ export const EventForm: React.FC = () => {
           type="number"
           required
           InputProps={{
-            inputProps: { min: 0 }
+            inputProps: { min: 0 },
           }}
           sx={{ backgroundColor: "#fff" }}
         />
