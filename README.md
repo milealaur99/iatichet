@@ -99,27 +99,43 @@ This pipeline streamlines deployment, ensuring that *iaTichet.com* remains acces
 
 ## Screenshots 📸
 
-Below are some recommended screenshots to highlight the application’s features:
+Below are screenshots showcasing the main features and user interface of *iaTichet.com*:
 
-1. **Homepage with Event Filtering & Search** - Showcases the user-friendly search and filtering interface.
-   <img width="1495" alt="Screenshot 2024-11-04 at 22 34 07" src="https://github.com/user-attachments/assets/bd8f196b-05bc-43ce-bcba-fcd2bcdae8aa">
+### 1. Homepage with Event Filtering & Search
+A user-friendly interface for searching and filtering events based on date, crowding, and price.
 
-2. **Reservation Process** - A demonstration of the reservation workflow, including the fallback payment option. 
-   <img width="528" alt="Screenshot 2024-11-04 at 22 35 06" src="https://github.com/user-attachments/assets/99826a43-4d80-4f5a-9c80-e1e17fb4057f">
-<img width="1012" alt="Screenshot 2024-11-04 at 22 35 40" src="https://github.com/user-attachments/assets/d3b6025b-740e-41b5-affa-f5fccd0fa08e">
+![Homepage with Event Filtering](https://github.com/user-attachments/assets/bd8f196b-05bc-43ce-bcba-fcd2bcdae8aa)
 
-3. **Reservation Management** - The page where users can view, manage, and download their reservations. 
-   <img width="1118" alt="Screenshot 2024-11-04 at 22 36 32" src="https://github.com/user-attachments/assets/d43b0190-ec47-4e8d-a237-f13dc63e8744">
-   <img width="1014" alt="Screenshot 2024-11-04 at 22 36 47" src="https://github.com/user-attachments/assets/69ccda93-7e7e-4a43-9536-f501318a970c">
+---
 
-4. **Event Creation & User Management** - Displays the powerful admin interface for managing events and users. 
-  <img width="920" alt="Screenshot 2024-11-04 at 22 37 34" src="https://github.com/user-attachments/assets/ae2f9962-01ac-4f84-bf1c-2d55b051e1ad">
-  <img width="718" alt="Screenshot 2024-11-04 at 22 37 56" src="https://github.com/user-attachments/assets/acedbaff-9cac-4494-abda-f81326e2492a">
-  
-5. **Real-Time Notifications** - Captures real-time updates, enhancing the interactive user experience. 
-  <img width="344" alt="Screenshot 2024-11-04 at 22 38 55" src="https://github.com/user-attachments/assets/fb53c083-91ef-44e7-9896-8120b6e0c3a2">
+### 2. Reservation Process
+A demonstration of the ticket reservation process, including a fallback payment option for user convenience.
 
-Each screenshot illustrates core features and the user journey, offering insights into the app’s functionality.
+![Reservation Step 1](https://github.com/user-attachments/assets/99826a43-4d80-4f5a-9c80-e1e17fb4057f)
+![Reservation Step 2](https://github.com/user-attachments/assets/d3b6025b-740e-41b5-affa-f5fccd0fa08e)
+
+---
+
+### 3. Reservation Management
+Page for users to view, manage, and download their reservations, including QR code PDFs for event entry.
+
+![Manage Reservations 1](https://github.com/user-attachments/assets/d43b0190-ec47-4e8d-a237-f13dc63e8744)
+![Manage Reservations 2](https://github.com/user-attachments/assets/69ccda93-7e7e-4a43-9536-f501318a970c)
+
+---
+
+### 4. Event Creation & User Management
+Admin interface for creating events and managing users, permissions, and reservations.
+
+![Admin Event Creation](https://github.com/user-attachments/assets/ae2f9962-01ac-4f84-bf1c-2d55b051e1ad)
+![Admin User Management](https://github.com/user-attachments/assets/acedbaff-9cac-4494-abda-f81326e2492a)
+
+---
+
+### 5. Real-Time Notifications
+Real-time updates enhance interactivity, showing reservation status changes and other user notifications.
+
+![Real-Time Notifications](https://github.com/user-attachments/assets/fb53c083-91ef-44e7-9896-8120b6e0c3a2)
 
 ---
 
@@ -139,7 +155,9 @@ To expand *iaTichet.com* and leverage the scalability, security, and reliability
    RDS will simplify database management with a managed solution, supporting either MongoDB compatibility (via Amazon DocumentDB) or PostgreSQL to store reservation and user data securely. RDS offers automated backups, scaling options, and maintenance, enhancing reliability and performance.
 
 4. **Amazon ElastiCache**:  
-   For improved caching, ElastiCache with Redis will be implemented to reduce database load and improve response times by storing frequently accessed data in-memory.
+   For improved caching,
+
+ ElastiCache with Redis will be implemented to reduce database load and improve response times by storing frequently accessed data in-memory.
 
 5. **Amazon API Gateway**:  
    API Gateway will enable secure and scalable API management, controlling traffic to the backend and enforcing rate limits. Its integration with other AWS services will provide an additional security layer for exposed endpoints.
