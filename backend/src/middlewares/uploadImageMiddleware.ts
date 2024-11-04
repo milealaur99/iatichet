@@ -1,6 +1,7 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+
 const uploadsPath = path.join(__dirname, "../../uploads");
 
 try {
@@ -20,7 +21,7 @@ const storage = multer.diskStorage({
       null,
       `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
     );
-  },
+  }
 });
 
 export const upload = multer({
@@ -28,7 +29,7 @@ export const upload = multer({
   limits: { fileSize: 1000000 },
   fileFilter: (req, file, cb) => {
     checkFileType(file, cb);
-  },
+  }
 }).single("poster");
 
 function checkFileType(

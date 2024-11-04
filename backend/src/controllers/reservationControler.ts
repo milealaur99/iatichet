@@ -2,28 +2,47 @@ import { Request, Response, NextFunction } from "express";
 import Reservation, {
   Reservation as ReservationType,
 } from "../models/Reservation";
-import { Hall as HallType, Seat } from "../models/Hall";
+import Hall, { Hall as HallType, Seat } from "../models/Hall";
 import EventModel, { Event } from "../models/Event";
-import { getAsync, setAsync } from "../utils/redisUtils";
+import { getAsync, setAsync, timeoutStorage } from "../utils/redisUtils";
 import { AppError } from "../middlewares/errorMiddleware";
+import { omit } from "lodash";
 
 export const createReservation = async (
   req: Request & {
     user?: { id: string; username: string; password: string };
+    body: { eventId: string; seats: Seat[] };
   },
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { eventId, seats, date, price } = req.body;
-    let eventModel: Event | undefined;
+    if (
+      timeoutStorage.get(`restoreSeatsForUnpaidReservations-${req.user?.id}`)
+    ) {
+      return res.status(400).json({
+        message: "You have an unpaid reservation in progress",
+      });
+    }
+    if (!req.body.seats || req.body.seats.length === 0) {
+      return res.status(400).json({ message: "No seats selected" });
+    }
 
-    const eventFromRedis = (await getAsync(`/api/events/${eventId}`)) as Event;
+    if (req.body.seats.length > 5) {
+      return res.status(400).json({ message: "Max 5 seats per reservation" });
+    }
 
-    if (eventFromRedis) {
-      eventModel = eventFromRedis;
-    } else {
-      eventModel = (await EventModel.findById(eventId)) as Event;
+    const { eventId, seats } = req.body;
+
+    let eventModel: Event = (await EventModel.findById(eventId)) as Event;
+    const currentDate = new Date();
+
+    if (!eventModel) {
+      return res.status(400).json({ message: "Invalid event" });
+    }
+
+    if (currentDate > new Date(eventModel?.date)) {
+      return res.status(400).json({ message: "Event has already passed" });
     }
 
     if (!eventModel || !eventModel.seats) {
@@ -45,34 +64,77 @@ export const createReservation = async (
       });
     }
 
+    const hall = await Hall.findById(eventModel.hall);
+    if (!hall) {
+      return next(new AppError("Hall not found", 404));
+    }
+
     const reservation: ReservationType = new Reservation({
       user: req?.user?.id,
       event: eventModel._id,
-      hall: eventModel.hall,
+      hall: hall._id,
       seats,
-      date,
-      price: seats.length * price,
+      date: new Date(),
+      price: seats.length * eventModel.tichetPrice * 100,
+      eventDate: eventModel.date,
     });
 
-    await setAsync({
-      key: `/api/events/${eventId}`,
-      value: {
-        ...eventModel,
-        seats: eventModel.seats.map((seat) => {
-          if (
-            seats.find(
-              (s: Seat) => s.row === seat.row && s.number === seat.number
-            )
-          ) {
-            seat.reservationOps = {
-              isReserved: true,
-              reservation: reservation.id.toString(),
-            };
-          }
-          return seat;
-        }),
-      },
-    });
+    eventModel.seats = [
+      ...eventModel.seats,
+      ...seats.map((seat: Seat) => ({
+        ...seat,
+        reservationOps: {
+          ...seat.reservationOps,
+          isReserved: true,
+          reservation: reservation._id,
+        },
+      })),
+    ];
+
+    await eventModel.save();
+    await reservation.save();
+
+    const restoreSeatsForUnpaidReservations = setTimeout(async () => {
+      const eventModel: Event = (await EventModel.findById(eventId)) as Event;
+      const reservationModel: ReservationType | null =
+        await Reservation.findById(reservation._id);
+
+      if (!eventModel || !reservationModel) {
+        return;
+      }
+
+      const reservationWasPaid =
+        reservationModel.isPaid &&
+        seats.every(
+          (seat: Seat) =>
+            eventModel.seats.find(
+              (hallSeat) =>
+                hallSeat.row === seat.row &&
+                hallSeat.number === seat.number &&
+                hallSeat.reservationOps.isReserved &&
+                hallSeat.reservationOps.reservation ===
+                  reservationModel.id.toString()
+            ) !== undefined
+        );
+
+      if (!reservationWasPaid) {
+        eventModel.seats = eventModel.seats.filter((hallSeat) => {
+          return !seats.some((seat: Seat) => {
+            return hallSeat.row === seat.row && hallSeat.number === seat.number;
+          });
+        });
+        await eventModel.save();
+        await Reservation.findByIdAndDelete(reservation._id);
+      }
+      timeoutStorage.delete(
+        `restoreSeatsForUnpaidReservations-${reservation.user}`
+      );
+    }, 30 * 60 * 1000);
+
+    timeoutStorage.set(
+      `restoreSeatsForUnpaidReservations-${reservation.user}`,
+      restoreSeatsForUnpaidReservations
+    );
 
     res.status(201).json({
       message: "Draft of reservation created successfully",
@@ -84,7 +146,7 @@ export const createReservation = async (
 };
 
 export const getAllReservations = async (
-  req: Request & { query: { page?: number } },
+  req: Request & { query: { page?: number }; user?: { id: string } },
   res: Response,
   next: NextFunction
 ) => {
@@ -92,9 +154,22 @@ export const getAllReservations = async (
     const page: number = req.query.page ? +req.query.page : 1;
     const skip: number = (page - 1) * 10;
 
-    const currentReservations = (await getAsync(
+    let currentReservations = (await getAsync(
       "/api/reservations"
     )) as ReservationType[];
+
+    if (!currentReservations) {
+      currentReservations = await Reservation.find({ user: req.user?.id }).sort(
+        {
+          date: 1,
+        }
+      );
+      await setAsync({
+        key: "/api/reservations",
+        value: currentReservations,
+      });
+    }
+
     const reservations = currentReservations;
     const filteredReservations = reservations.slice(skip, skip + 10);
 
@@ -111,23 +186,15 @@ export const getAllReservations = async (
 };
 
 export const getReservationById = async (
-  req: Request,
+  req: Request & { user?: { id: string; role: "user" | "admin" } },
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const currentReservations = (await getAsync(
-      "/api/reservations"
-    )) as ReservationType[];
-    const reservationFromCache = currentReservations.find(
-      (reservation: ReservationType) => reservation._id === req.params.id
-    );
+    const reservation = await Reservation.findById(req.params.id)
+      .populate("user")
+      .populate("hall", "name");
 
-    if (reservationFromCache) {
-      return res.status(200).json(reservationFromCache);
-    }
-
-    const reservation = await Reservation.findById(req.params.id);
     if (!reservation) {
       return res.status(404).json({ message: "Reservation not found" });
     }
@@ -138,12 +205,25 @@ export const getReservationById = async (
 };
 
 export const deleteReservation = async (
-  req: Request,
+  req: Request & {
+    user?: {
+      id: string;
+      username: string;
+      password: string;
+      role: "user" | "admin";
+    };
+  },
   res: Response,
   next: NextFunction
 ) => {
   try {
     const reservation = await Reservation.findById(req.params.id);
+    const isAdmin = req.user?.role === "admin";
+
+    if (!isAdmin && reservation?.user.toString() !== req.user?.id) {
+      return res.status(403).json({ message: "Forbidden access" });
+    }
+
     if (!reservation) {
       return res.status(404).json({ message: "Reservation not found" });
     }
@@ -184,6 +264,24 @@ export const deleteReservation = async (
       });
     }
 
+    const userReservations = (await getAsync(
+      `/api/reservations/user/${reservation.user}`
+    )) as ReservationType[];
+
+    if (userReservations) {
+      await setAsync({
+        key: `/api/reservations/user/${reservation.user}`,
+        value: userReservations?.filter(
+          (reservation: ReservationType) => reservation._id !== req.params.id
+        ),
+      });
+    } else {
+      await setAsync({
+        key: `/api/reservations/user/${reservation.user}`,
+        value: await Reservation.find({ user: reservation.user }),
+      });
+    }
+
     res.status(200).json({ message: "Reservation deleted successfully" });
   } catch (error) {
     next(new AppError("Error deleting reservation", 400));
@@ -196,23 +294,131 @@ export const getUserReservations = async (
       id: string;
       username: string;
       password: string;
+      role: "user" | "admin";
     };
   },
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const currentReservations = (await getAsync(
-      `/api/reservations/${req.user?.id}`
-    )) as ReservationType[];
+    const isCurrentUser = req.user?.id === req.params.userId;
+    const isAdmin = req.user?.role === "admin";
 
-    if (currentReservations) {
-      return res.status(200).json(currentReservations);
+    if (!isCurrentUser && !isAdmin) {
+      return res.status(403).json({ message: "Forbidden access" });
     }
 
-    const reservations = await Reservation.find({ user: req.user?.id });
-    res.status(200).json(reservations);
+    const page: number = req.query.page ? +req.query.page : 1;
+    const limit: number = 10;
+    const skip: number = (page - 1) * limit;
+
+    const reservations = (await Reservation.find({
+      user: req.params.userId || req.user?.id,
+    })
+      .populate("event")
+      .populate("hall")
+      .sort({
+        date: -1,
+      })) as (ReservationType & {
+      event: Event;
+      hall: HallType;
+    })[];
+
+    if (!reservations) {
+      return res.status(404).json({ message: "Reservations not found" });
+    }
+
+    const totalPages = Math.ceil(reservations.length / limit);
+    const filteredReservations = reservations
+      .slice(skip, skip + limit)
+      .map((reservation) =>
+        omit(
+          {
+            eventName: reservation.event.name,
+            eventId: reservation.event._id,
+            hall: reservation.hall,
+            ...(reservation.toObject() as object),
+          },
+          ["event", "hall"]
+        )
+      );
+
+    res.status(200).json({
+      reservations: filteredReservations,
+      totalPages,
+      page,
+    });
   } catch (error) {
     next(new AppError("Error fetching reservations", 400));
+  }
+};
+
+export const cancelPendingReservations = async (
+  req: Request & {
+    user?: {
+      id: string;
+      username: string;
+      password: string;
+      role: "user" | "admin";
+    };
+    body: {
+      reservationId: string;
+    };
+  },
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const reservation = (await Reservation.findById(
+      req.params.id
+    )) as ReservationType;
+
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservations not found" });
+    }
+
+    if (
+      reservation.user.toString() !== req.user?.id &&
+      req.user?.role !== "admin"
+    ) {
+      return res.status(403).json({ message: "Forbidden access" });
+    }
+
+    const restoreSeatsForUnpaidReservations = `restoreSeatsForUnpaidReservations-${reservation.user}`;
+
+    clearTimeout(timeoutStorage.get(restoreSeatsForUnpaidReservations));
+    timeoutStorage.delete(restoreSeatsForUnpaidReservations);
+
+    const eventModel = await EventModel.findById(reservation.event);
+    if (!eventModel) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    eventModel.seats = eventModel.seats.filter((hallSeat) => {
+      return !reservation.seats.some((seat) => {
+        return hallSeat.row === seat.row && hallSeat.number === seat.number;
+      });
+    });
+
+    await Reservation.findByIdAndDelete(req.params.id);
+    await eventModel.save();
+    let currentReservations = (await getAsync(
+      "/api/reservations"
+    )) as ReservationType[];
+    if (!currentReservations) {
+      currentReservations = await Reservation.find({ user: req.user?.id }).sort(
+        { date: -1 }
+      );
+      await setAsync({
+        key: "/api/reservations",
+        value: currentReservations.filter(
+          (reservation: ReservationType) => reservation._id !== req.params.id
+        ),
+      });
+    }
+
+    return res.status(200).json({ message: "Reservations canceled" });
+  } catch (error) {
+    next(new AppError("Error canceling reservations", 400));
   }
 };

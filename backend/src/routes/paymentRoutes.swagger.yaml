@@ -1,0 +1,160 @@
+openapi: 3.0.0
+info:
+  title: Payment API
+  version: 1.0.0
+  description: API routes for handling payments.
+
+tags:
+  - name: Payment
+    description: Routes related to payment processing
+
+paths:
+  /api/payment/create-checkout-session:
+    post:
+      tags:
+        - Payment
+      summary: Create a Stripe checkout session
+      description: Creates a Stripe checkout session for a reservation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reservation:
+                  type: object
+                  description: Reservation details
+                  properties:
+                    _id:
+                      type: string
+                      description: The reservation ID
+                      example: "605c72b2f1a5b203d4a12345"
+                    seats:
+                      type: array
+                      items:
+                        type: string
+                      description: Array of reserved seat IDs
+                    event:
+                      type: string
+                      description: The ID of the associated event
+                      example: "605c72b2f1a5b203d4a67890"
+      responses:
+        "200":
+          description: Checkout session created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The ID of the Stripe session
+                    example: "cs_test_a1b2c3d4"
+                  url:
+                    type: string
+                    description: The URL to the Stripe checkout page
+                    example: "https://checkout.stripe.com/pay/cs_test_a1b2c3d4"
+        "404":
+          description: Not Found - Event or reservation not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Event not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+  /api/payment/success:
+    get:
+      tags:
+        - Payment
+      summary: Handle successful payment
+      description: Handles successful payment and updates the reservation and event data accordingly.
+      parameters:
+        - name: reservationId
+          in: query
+          description: The ID of the reservation
+          required: true
+          schema:
+            type: string
+            example: "605c72b2f1a5b203d4a12345"
+      responses:
+        "200":
+          description: Payment success handled successfully, redirects to the success page.
+        "404":
+          description: Not Found - Reservation or event not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reservation not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+  /api/payment/cancel:
+    get:
+      tags:
+        - Payment
+      summary: Handle payment cancellation
+      description: Handles the cancellation of a payment and updates the reservation and event data accordingly.
+      parameters:
+        - name: reservationId
+          in: query
+          description: The ID of the reservation
+          required: true
+          schema:
+            type: string
+            example: "605c72b2f1a5b203d4a12345"
+      responses:
+        "200":
+          description: Payment cancellation handled successfully, redirects to the cancel page.
+        "404":
+          description: Not Found - Reservation or event not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reservation not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal server error"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

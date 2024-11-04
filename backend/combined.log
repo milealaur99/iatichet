@@ -5,3 +5,207 @@
 {"level":"error","message":"400 - Invalid token","timestamp":"2024-06-25T12:39:11.674Z"}
 {"level":"error","message":"400 - Invalid token","timestamp":"2024-06-25T12:44:42.081Z"}
 {"level":"error","message":"400 - Error fetching event","timestamp":"2024-06-27T10:19:34.406Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:23:49.420Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-25T18:23:49.538Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:29:39.570Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-25T18:29:39.613Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:29:39.749Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:29:39.825Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-25T18:29:39.852Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:29:39.978Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:29:40.067Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:29:40.199Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:29:40.273Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:29:40.397Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:29:40.419Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:29:40.554Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:29:40.842Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:32:30.146Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-25T18:32:30.192Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:32:30.314Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:32:30.380Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-25T18:32:30.399Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:32:30.545Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:32:30.609Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:32:30.722Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:32:30.791Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:32:30.921Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:32:30.946Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:32:31.073Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:32:31.329Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:38:06.631Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-25T18:38:06.662Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:38:06.785Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:38:06.869Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-25T18:38:06.885Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:38:07.041Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:38:07.116Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:38:07.242Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:38:07.313Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:38:07.436Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:38:07.454Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:38:07.581Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:38:07.838Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:41:31.344Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-25T18:41:31.378Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:41:31.508Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:41:31.576Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-25T18:41:31.597Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:41:31.719Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:41:31.786Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:41:31.909Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:41:31.989Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:41:32.118Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:41:32.137Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:41:32.258Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:41:32.512Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:42:47.930Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-25T18:42:47.977Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:42:48.095Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:42:48.159Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-25T18:42:48.183Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:42:48.297Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:42:48.371Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:42:48.496Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:42:48.558Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:42:48.676Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:42:48.691Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:42:48.817Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:42:49.055Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-25T18:43:46.991Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-25T18:43:47.025Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T14:44:53.959Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T14:44:53.994Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T14:47:21.311Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T14:47:21.325Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:03:44.720Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:03:44.747Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:06:47.496Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:06:47.513Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:10:20.803Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:10:20.835Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:10:20.949Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:10:21.012Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:10:21.022Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:10:21.141Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:10:21.221Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:10:21.327Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:10:21.397Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:10:21.528Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:10:21.547Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:10:21.655Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:10:21.895Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:16:50.958Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:16:50.982Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:16:51.107Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:16:51.174Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:16:51.182Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:16:51.295Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:16:51.367Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:16:51.476Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:16:51.547Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:16:51.659Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:16:51.678Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:16:51.793Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:16:52.029Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:18:01.457Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:18:34.442Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:18:34.467Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:19:14.631Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:19:14.657Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:19:56.625Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:19:56.648Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:26:32.161Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:26:32.190Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:28:37.084Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:28:37.113Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:30:07.067Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:30:07.089Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:32:12.466Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:32:12.488Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:32:35.938Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:32:35.966Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:33:18.826Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:33:18.893Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:33:47.565Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:33:47.597Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:34:39.565Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:34:39.594Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:35:22.324Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:35:22.352Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:41:04.560Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:41:04.587Z"}
+{"level":"error","message":"500 - req.csrfToken is not a function","timestamp":"2024-09-26T15:43:08.287Z"}
+{"level":"error","message":"500 - req.csrfToken is not a function","timestamp":"2024-09-26T15:43:53.223Z"}
+{"level":"error","message":"500 - req.csrfToken is not a function","timestamp":"2024-09-26T15:43:53.738Z"}
+{"level":"error","message":"500 - req.csrfToken is not a function","timestamp":"2024-09-26T15:43:53.748Z"}
+{"level":"error","message":"500 - req.csrfToken is not a function","timestamp":"2024-09-26T15:43:53.755Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:44:26.052Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:44:26.077Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-26T15:45:10.124Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-26T15:45:10.155Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-27T13:34:22.676Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-27T13:34:22.798Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-27T13:35:56.097Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-27T13:35:56.156Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-27T13:37:49.319Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-27T13:37:49.450Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-27T13:38:27.272Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-27T13:38:27.389Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-27T13:39:25.714Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-27T13:39:25.812Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-27T13:44:30.066Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-27T13:44:30.181Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-27T14:02:31.559Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-27T14:02:31.645Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-27T14:06:56.586Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-27T14:10:29.465Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-27T14:34:26.934Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-27T14:34:27.007Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-27T14:44:49.277Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-27T14:44:49.331Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-27T14:45:33.620Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-27T14:46:21.555Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-09-27T14:47:20.917Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T14:57:37.416Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T14:57:37.495Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T14:57:37.571Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T14:57:37.918Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T14:58:19.614Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T14:58:19.692Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T14:58:19.763Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T14:58:20.095Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T15:00:20.710Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T15:00:20.790Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T15:00:20.852Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T15:00:21.185Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T15:01:00.767Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T15:04:16.095Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T15:05:33.548Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T15:07:15.997Z"}
+{"level":"error","message":"403 - invalid csrf token","timestamp":"2024-09-28T15:07:45.190Z"}
+{"level":"error","message":"400 - Error updating event","timestamp":"2024-09-28T16:17:59.548Z"}
+{"level":"error","message":"400 - Unexpected field","timestamp":"2024-10-03T13:07:59.556Z"}
+{"level":"error","message":"400 - Unexpected field","timestamp":"2024-10-03T13:09:49.871Z"}
+{"level":"error","message":"400 - Unexpected field","timestamp":"2024-10-03T16:12:18.351Z"}
+{"level":"error","message":"400 - Unexpected field","timestamp":"2024-10-03T16:12:43.379Z"}
+{"level":"error","message":"400 - Unexpected field","timestamp":"2024-10-03T16:15:16.622Z"}
+{"level":"error","message":"400 - Unexpected field","timestamp":"2024-10-03T16:22:08.070Z"}
+{"level":"error","message":"400 - Error updating event","timestamp":"2024-10-03T17:19:09.973Z"}
+{"level":"error","message":"400 - Error updating event","timestamp":"2024-10-03T18:01:12.508Z"}
+{"level":"error","message":"400 - Error updating event","timestamp":"2024-10-03T18:01:36.345Z"}
+{"level":"error","message":"400 - Error updating event","timestamp":"2024-10-03T18:02:28.142Z"}
+{"level":"error","message":"400 - Error updating event","timestamp":"2024-10-03T18:03:36.860Z"}
+{"level":"error","message":"404 - Not Found","timestamp":"2024-10-03T18:23:56.125Z"}
+{"level":"error","message":"404 - Not Found","timestamp":"2024-10-03T18:25:51.951Z"}
+{"level":"error","message":"404 - Not Found","timestamp":"2024-10-03T18:26:27.700Z"}
+{"level":"error","message":"404 - Not Found","timestamp":"2024-10-03T18:27:00.551Z"}
+{"level":"error","message":"404 - Not Found","timestamp":"2024-10-03T18:27:58.061Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-10-04T07:51:54.522Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-10-04T07:52:55.233Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-10-04T07:52:56.401Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-10-04T07:52:58.780Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-10-04T08:17:29.734Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-10-04T08:17:31.084Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-10-04T08:18:16.025Z"}
+{"level":"error","message":"400 - Invalid token","timestamp":"2024-10-04T08:18:17.245Z"}

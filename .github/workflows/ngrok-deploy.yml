@@ -1,0 +1,91 @@
+name: Deploy Backend and Frontend with Ngrok
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Compose
+        run: sudo apt-get install -y docker-compose
+
+      - name: Download and Install Latest Ngrok
+        run: |
+          echo "Downloading the latest version of Ngrok..."
+          wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip -O ngrok.zip
+          unzip ngrok.zip
+          sudo mv ngrok /usr/local/bin/
+          ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
+
+      - name: Start Services with Docker Compose
+        run: docker-compose up -d --build
+
+      - name: Wait for Backend to Start
+        run: |
+          echo "Waiting for backend to become healthy..."
+          RETRIES=20
+          until docker-compose exec -T backend curl -f http://localhost:5000/api/health; do
+            echo "Backend not healthy yet, retrying..."
+            RETRIES=$((RETRIES-1))
+            if [ $RETRIES -le 0 ]; then
+              echo "Backend did not become healthy in time."
+              exit 1
+            fi
+            sleep 5
+          done
+
+      - name: Start Ngrok Tunnel
+        run: ngrok http 5000 --log=stdout > ngrok.log &
+
+      - name: Fetch Ngrok Public URL
+        run: |
+          echo "Fetching Ngrok URL..."
+          RETRIES=5
+          until [ "$NGROK_URL" != "" ]; do
+            NGROK_URL=$(curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+            if [ -z "$NGROK_URL" ]; then
+              echo "Ngrok URL not available yet, retrying..."
+              RETRIES=$((RETRIES-1))
+              if [ $RETRIES -le 0 ]; then
+                echo "Ngrok URL could not be fetched in time."
+                exit 1
+              fi
+              sleep 5
+            fi
+          done
+          echo "NGROK_URL=${NGROK_URL}" >> $GITHUB_ENV
+          echo "Fetched Ngrok URL: $NGROK_URL"
+
+      - name: Update Env Var in Frontend's .env file
+        run: |
+          echo "REACT_APP_BACKEND_URL=${NGROK_URL}" > ./frontend/event-management/.env
+          echo "Updated REACT_APP_BACKEND_URL in .env to $NGROK_URL"
+
+      - name: Update Env Var on Render.com
+        run: |
+          echo "Updating Render.com environment variable with Ngrok URL: $NGROK_URL"
+          curl -X PUT \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"value": "'$NGROK_URL'"}' \
+            https://api.render.com/v1/env-groups/${{ secrets.ENV_GROUP_ID }}/env-vars/${{ secrets.ENV_VAR_KEY }}
+
+      - name: Trigger Deployment on Render.com
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": "do_not_clear"}' \
+            https://api.render.com/v1/services/${{ secrets.SERVICE_ID }}/deploys
+
+      - name: Keep GitHub Actions Job Alive with Ngrok Logging
+        run: |
+          echo "Keeping GitHub Actions job running to maintain Ngrok tunnel and log requests."
+          tail -f ngrok.log

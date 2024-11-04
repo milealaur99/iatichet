@@ -9,26 +9,40 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
-      - WDS_SOCKET_HOST= localhost
+      - WDS_SOCKET_HOST=localhost
+      - REACT_APP_BACKEND_URL=http://localhost:5000
     ports:
       - "3000:3000"
     depends_on:
       - backend
-      - redis
-      - mongo
+      - ngrok
 
   backend:
     build: ./backend
     volumes:
       - ./backend/uploads:/backend/uploads
+      - ./backend/pdfs:/backend/pdfs
+      - ./backend/assets:/backend/assets
     environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     ports:
       - "5000:5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ngrok:
+    image: ngrok/ngrok
+    command: http backend:5000
+    environment:
+      - NGROK_AUTHTOKEN=2nWnlou7c6TWCiPmvlabD7STo9S_5qUF9NaFkfkdrvCs4wV8K
+    ports:
+      - "4040:4040" # Exposes the Ngrok web interface for monitoring
     depends_on:
-      - redis
-      - mongo
+      - backend
 
   mongo:
     image: mongo:latest
@@ -43,9 +57,6 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
-    volumes:
-      - redis-data:/data
 
 volumes:
   mongo-data:
-  redis-data:

@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: iatichet-backend
+    env: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    envVars:
+      - key: PORT
+        value: "5000" # Portul pe care rulează backend-ul
+      - key: MONGO_URI
+        value: "mongodb+srv://vladaurelian11:Tudorel22@cluster0.9kitgb1.mongodb.net/iatichet" # URL-ul MongoDB
+      - key: JWT_SECRET
+        value: "NODEJSPROJECT_JWT" # Secretul JWT
+      - key: COOKIE_KEY
+        value: "NODEJSPROJECT_COOKIE" # Cheia pentru semnarea cookie-urilor
+      - key: REDIS_URL
+        value: "redis://redis:6379" # URL-ul Redis
+      - key: STRIPE_SECRET_KEY
+        value: "sk_test_51PVT2ADAwyrs41d27BHtIAC42kN4i8EOTrPqHyWArjKptuwnqNe44eLSfUpJi8gSqDYB64VxwdLAtdPmZ9Cv7Fqv00Tvq4s9vU" # Cheia secretă Stripe
