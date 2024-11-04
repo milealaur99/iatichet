@@ -155,9 +155,7 @@ To expand *iaTichet.com* and leverage the scalability, security, and reliability
    RDS will simplify database management with a managed solution, supporting either MongoDB compatibility (via Amazon DocumentDB) or PostgreSQL to store reservation and user data securely. RDS offers automated backups, scaling options, and maintenance, enhancing reliability and performance.
 
 4. **Amazon ElastiCache**:  
-   For improved caching,
-
- ElastiCache with Redis will be implemented to reduce database load and improve response times by storing frequently accessed data in-memory.
+   For improved caching, ElastiCache with Redis will be implemented to reduce database load and improve response times by storing frequently accessed data in-memory.
 
 5. **Amazon API Gateway**:  
    API Gateway will enable secure and scalable API management, controlling traffic to the backend and enforcing rate limits. Its integration with other AWS services will provide an additional security layer for exposed endpoints.
