@@ -17,7 +17,7 @@ import {
   Grid,
   Drawer,
   IconButton,
-  SelectChangeEvent
+  SelectChangeEvent,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -26,13 +26,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import { fetchImagesFromBackEnd } from "../util/fetchImagesFromBackEnd";
 import { LoadingMessage } from "./LoadingMessage";
 import { FilterList } from "@mui/icons-material";
+import { isEmpty, isNil, omitBy } from "lodash";
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   color: theme.palette.text.primary,
   minHeight: "100vh",
   padding: "40px 20px",
   display: "flex",
-  flexDirection: "column"
+  flexDirection: "column",
 }));
 
 const FilterContainer = styled(Grid)(({ theme }) => ({
@@ -44,8 +45,8 @@ const FilterContainer = styled(Grid)(({ theme }) => ({
   justifyContent: "center",
   gap: theme.spacing(2),
   [theme.breakpoints.down("sm")]: {
-    flexDirection: "column"
-  }
+    flexDirection: "column",
+  },
 }));
 
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -59,34 +60,34 @@ const StyledCard = styled(Card)(({ theme }) => ({
   transition: "transform 0.3s, box-shadow 0.3s",
   "&:hover": {
     transform: "scale(1.05)",
-    boxShadow: "0px 8px 30px rgba(0, 0, 0, 0.2)"
-  }
+    boxShadow: "0px 8px 30px rgba(0, 0, 0, 0.2)",
+  },
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.primary.light,
   "&:hover": {
-    backgroundColor: theme.palette.primary.main
+    backgroundColor: theme.palette.primary.main,
   },
   color: theme.palette.common.white,
   marginTop: "10px",
   borderRadius: "20px",
-  fontWeight: "bold"
+  fontWeight: "bold",
 }));
 
 const ApplyButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.primary.light,
   color: theme.palette.common.white,
   "&:hover": {
-    backgroundColor: theme.palette.primary.main
+    backgroundColor: theme.palette.primary.main,
   },
   borderRadius: "20px",
   height: "40px",
-  minWidth: "120px"
+  minWidth: "120px",
 }));
 
 const StyledTextField = styled(TextField)({
-  flexGrow: 1
+  flexGrow: 1,
 });
 
 const StyledPagination = styled(Pagination)(({ theme }) => ({
@@ -94,26 +95,26 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
   justifyContent: "center",
   display: "flex",
   ".MuiPaginationItem-root": {
-    color: theme.palette.primary.light
-  }
+    color: theme.palette.primary.light,
+  },
 }));
 
 const TruncatedTypography = styled(Typography)({
   whiteSpace: "nowrap",
   overflow: "hidden",
-  textOverflow: "ellipsis"
+  textOverflow: "ellipsis",
 });
 
 const StyledImageContainer = styled(Box)({
   width: "100%",
   height: 200,
-  overflow: "hidden"
+  overflow: "hidden",
 });
 
 const StyledImage = styled("img")({
   width: "100%",
   height: "100%",
-  objectFit: "cover"
+  objectFit: "cover",
 });
 
 type Event = {
@@ -141,35 +142,59 @@ const ImageContainer = ({ poster }: { poster: string }) => {
   return <StyledImage src={src || ""} alt="Event poster" />;
 };
 
-export const EventList: React.FC = () => {
-  const [filters, setFilters] = useState<{
-    date?: string;
-    price?: string;
-    hall?: string;
-    seatsPercentage?: string;
-  }>({});
-  const [appliedFilters, setAppliedFilters] = useState(filters);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [currentPage, setCurrentPage] = useState<number | undefined>(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+const getUrlFiltersFromParams = (location: {
+  search: string;
+}): {
+  date?: string;
+  price?: string;
+  hall?: string;
+  seatsPercentage?: string;
+  search?: string;
+  page?: number;
+} => {
+  const searchParams = new URLSearchParams(location.search);
 
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const queryFilters = {
+  return omitBy(
+    {
       search: searchParams.get("search") || undefined,
       date: searchParams.get("date") || undefined,
       price: searchParams.get("price") || undefined,
       hall: searchParams.get("hall") || undefined,
       seatsPercentage: searchParams.get("seatsPercentage") || undefined,
-      page: searchParams.get("page") || undefined
-    };
+      page: searchParams.get("page")
+        ? Number(searchParams.get("page"))
+        : undefined,
+    },
+    isNil
+  );
+};
+
+export const EventList: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [filters, setFilters] = useState<{
+    date?: string;
+    price?: string;
+    hall?: string;
+    seatsPercentage?: string;
+    search?: string;
+    page?: number;
+  }>(getUrlFiltersFromParams(location));
+  const [appliedFilters, setAppliedFilters] = useState(filters);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number | undefined>(
+    filters?.page ?? 1
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const queryFilters = getUrlFiltersFromParams(location);
     setAppliedFilters(queryFilters);
-    setCurrentPage(parseInt(queryFilters.page ?? "1", 10));
+    setCurrentPage(queryFilters.page ?? 1);
   }, [location.search]);
 
   useEffect(() => {
@@ -181,9 +206,8 @@ export const EventList: React.FC = () => {
           `${process.env.REACT_APP_BACKEND_URL}/api/events`,
           {
             params: {
-              page: currentPage,
-              ...appliedFilters
-            }
+              ...appliedFilters,
+            },
           }
         );
         setEvents(response.data.events ?? []);
@@ -195,16 +219,17 @@ export const EventList: React.FC = () => {
         setLoading(false);
       }
     };
-
-    fetchEvents();
-  }, [appliedFilters, currentPage]);
+    if (!isEmpty(appliedFilters)) {
+      fetchEvents();
+    }
+  }, [appliedFilters]);
 
   const handleFilterChange =
     (filterName: keyof typeof filters) =>
     (event: React.ChangeEvent<HTMLInputElement | { value: unknown }> | any) => {
       setFilters((prev) => ({
         ...prev,
-        [filterName]: event?.target?.value || event
+        [filterName]: event?.target?.value || event,
       }));
     };
 
@@ -215,9 +240,9 @@ export const EventList: React.FC = () => {
     };
 
   const applyFilters = () => {
-    setAppliedFilters(filters);
+    setAppliedFilters({ ...filters, page: 1 });
     setCurrentPage(1);
-    const searchParams = new URLSearchParams(filters as any);
+    const searchParams = new URLSearchParams({ ...filters, page: 1 } as any);
     navigate({ search: searchParams.toString() });
   };
 
@@ -226,6 +251,7 @@ export const EventList: React.FC = () => {
     page: number
   ) => {
     setCurrentPage(page);
+    setAppliedFilters((prev) => ({ ...prev, page }));
     const searchParams = new URLSearchParams(location.search);
     searchParams.set("page", page.toString());
     navigate({ search: searchParams.toString() });
@@ -316,11 +342,11 @@ export const EventList: React.FC = () => {
             open={mobileOpen}
             onClose={handleDrawerToggle}
             ModalProps={{
-              keepMounted: true
+              keepMounted: true,
             }}
             sx={{
               display: { xs: "block", sm: "none" },
-              "& .MuiDrawer-paper": { boxSizing: "border-box", width: 250 }
+              "& .MuiDrawer-paper": { boxSizing: "border-box", width: 250 },
             }}
           >
             {drawer}
@@ -344,7 +370,7 @@ export const EventList: React.FC = () => {
               <Box>
                 <FormControl
                   sx={{
-                    width: "200px"
+                    width: "200px",
                   }}
                 >
                   <InputLabel id="hall-label">Filter by Hall</InputLabel>
@@ -387,7 +413,7 @@ export const EventList: React.FC = () => {
           sx={{
             display: "flex",
             justifyContent: "center",
-            flexDirection: "column"
+            flexDirection: "column",
           }}
         >
           {events.length === 0 ? (
@@ -399,7 +425,7 @@ export const EventList: React.FC = () => {
               sx={{
                 display: "flex",
                 flexWrap: "wrap",
-                justifyContent: "center"
+                justifyContent: "center",
               }}
             >
               {events.map((event: Event) => (

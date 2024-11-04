@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import Event, { Event as EventType } from "../models/Event";
-import Hall, { Hall as HallType, Seat } from "../models/Hall";
-import mongoose from "mongoose";
+import Hall, { Seat } from "../models/Hall";
 import { AppError } from "../middlewares/errorMiddleware";
 import { upload } from "../middlewares/uploadImageMiddleware";
 import { fork } from "child_process";
@@ -52,14 +51,14 @@ export const createEvent = async (
           tichetPrice,
           hall: hallModel._id,
           seats: [],
-          poster: processedPath
+          poster: processedPath,
         });
 
         await event.save();
 
         res.status(201).json({
           message: "Event created successfully",
-          event: { ...event.toObject(), hall: hallModel.name }
+          event: { ...event.toObject(), hall: hallModel.name },
         });
       });
 
@@ -91,7 +90,7 @@ export const getAllEvents = async (
       date,
       hall,
       seatsPercentage,
-      search
+      search,
     }: {
       price?: number;
       date?: string;
@@ -102,30 +101,30 @@ export const getAllEvents = async (
 
     const page: number = req.query.page ? +req.query.page : 1;
     const skip: number = (page - 1) * 10;
-
     const [startDate, endDate] = (date || "").split("|") as [string, string];
     const parsedStartDate = startDate
-      ? new Date(+startDate).getTime()
+      ? new Date(+startDate)
       : new Date().setHours(0, 0, 0, 0);
-    const parsedEndDate = endDate ? new Date(+endDate).getTime() : undefined;
+    const parsedEndDate = endDate
+      ? new Date(+endDate).setHours(23, 59, 59, 999)
+      : undefined;
 
     const hallId = hall ? (await Hall.findOne({ name: hall }))?._id : null;
 
     const query: Object = {
+      ...(price ? { tichetPrice: { $lte: Number(price) } } : {}),
+      ...(search ? { name: { $regex: new RegExp(search, "i") } } : {}),
+      ...(hall ? { hall: hallId } : {}),
       ...(startDate && endDate
         ? {
             date: {
               $gte: parsedStartDate,
-              $lte: parsedEndDate
-            }
+              $lte: parsedEndDate,
+            },
           }
         : { date: { $gte: new Date().setHours(0, 0, 0, 0) } }),
-      ...(price ? { tichetPrice: { $lte: Number(price) } } : {}),
-      ...(search ? { name: { $regex: new RegExp(search, "i") } } : {}),
-      ...(hall ? { hall: hallId } : {})
     };
-
-    let currentEvents = await Event.find(query).populate("hall").exec();
+    let currentEvents = await Event.find(query).populate("hall");
 
     if (seatsPercentage !== undefined) {
       currentEvents = currentEvents.filter(async (event: EventType) => {
@@ -147,14 +146,14 @@ export const getAllEvents = async (
 
     const eventsWithHall = currentEvents.map((event: EventType) => ({
       ...event.toObject(),
-      hall: (event.hall as unknown as EventType)?.name || ""
+      hall: (event.hall as unknown as EventType)?.name || "",
     }));
 
     if (eventsWithHall.length === 0) {
       return res.status(200).json({
         events: [],
         totalPages: 0,
-        page: 1
+        page: 1,
       });
     }
 
@@ -163,7 +162,7 @@ export const getAllEvents = async (
     return res.status(200).json({
       events: eventsWithHall,
       totalPages,
-      page
+      page,
     });
   } catch (error) {
     next(new AppError("Error fetching events", 400));
@@ -182,7 +181,7 @@ export const getEventById = async (
     }
     res.status(200).json({
       ...eventModel.toObject(),
-      hall: (eventModel.hall as any)?.name || ""
+      hall: (eventModel.hall as any)?.name || "",
     });
   } catch (error) {
     next(new AppError("Error fetching event", 400));
