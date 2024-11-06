@@ -23,6 +23,7 @@ services:
       - ./backend/uploads:/backend/uploads
       - ./backend/pdfs:/backend/pdfs
       - ./backend/assets:/backend/assets
+      - ./backend/pdfs:/app/pdfs
     env_file:
       - ./backend/.env
     ports:
