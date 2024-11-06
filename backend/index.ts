@@ -29,6 +29,7 @@ app.use("/api/health", (req: Request, res: Response) => {
 });
 
 setupSecurity({ app });
+app.set("trust proxy", true);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/reservations", reservationRoutes);
