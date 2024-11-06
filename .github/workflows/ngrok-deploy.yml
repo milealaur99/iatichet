@@ -105,7 +105,10 @@ jobs:
             -d '{"clearCache": "do_not_clear"}' \
             https://api.render.com/v1/services/${{ secrets.SERVICE_ID }}/deploys
 
-      - name: Keep GitHub Actions Job Alive with Ngrok Logging
+      - name: Keep GitHub Actions Job Alive and Display Logs
         run: |
-          echo "Keeping GitHub Actions job running to maintain Ngrok tunnel and log requests."
-          tail -f ngrok.log
+          echo "Starting Ngrok logging..."
+          tail -f ngrok.log &
+              
+          echo "Starting backend logging..."
+          docker-compose logs -f backend
