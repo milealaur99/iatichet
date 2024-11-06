@@ -23,7 +23,7 @@ export const generateReservationPDF = async (
         right: 50,
       },
     });
-    console.log(doc);
+    console.log(path);
     doc.pipe(fs.createWriteStream(path));
 
     const user = await User.findById(reservation.user);
@@ -140,6 +140,7 @@ export const generateReservationPDF = async (
     }
 
     doc.end();
+    console.log("PDF generation completed:", path);
   } catch (error) {
     console.error(error);
   }
