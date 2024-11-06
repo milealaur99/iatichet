@@ -37,7 +37,7 @@ services:
     image: ngrok/ngrok
     command: http backend:5000
     environment:
-      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+      - NGROK_AUTHTOKEN=2nWnlou7c6TWCiPmvlabD7STo9S_5qUF9NaFkfkdrvCs4wV8K
     ports:
       - "4040:4040"
     depends_on:
