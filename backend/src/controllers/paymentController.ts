@@ -122,49 +122,48 @@ export const success = async (
 
     clearTimeout(timeoutStorage.get(restoreSeatsForUnpaidReservations));
     timeoutStorage.delete(restoreSeatsForUnpaidReservations);
+    // const currentReservations = (await getAsync(
+    //   "/api/reservations"
+    // )) as Reservation[];
 
-    const currentReservations = (await getAsync(
-      "/api/reservations"
-    )) as Reservation[];
+    // if (currentReservations) {
+    //   await setAsync({
+    //     key: "/api/reservations",
+    //     value: [...currentReservations, reservation],
+    //   });
+    // } else {
+    //   await setAsync({
+    //     key: "/api/reservations",
+    //     value: await ReservationModel.find(),
+    //   });
+    // }
 
-    if (currentReservations) {
-      await setAsync({
-        key: "/api/reservations",
-        value: [...currentReservations, reservation],
-      });
-    } else {
-      await setAsync({
-        key: "/api/reservations",
-        value: await ReservationModel.find(),
-      });
-    }
+    // const userReservations = (await getAsync(
+    //   `/api/reservations/${reservation.user.toString()}`
+    // )) as Reservation[];
 
-    const userReservations = (await getAsync(
-      `/api/reservations/${reservation.user.toString()}`
-    )) as Reservation[];
+    // if (userReservations) {
+    //   await setAsync({
+    //     key: `/api/reservations/${reservation.user.toString()}`,
+    //     value: [...userReservations, reservation],
+    //   });
+    // } else {
+    //   await setAsync({
+    //     key: `/api/reservations/${reservation.user.toString()}`,
+    //     value: await ReservationModel.find({
+    //       user: reservation.user.toString(),
+    //     }),
+    //   });
+    // }
 
-    if (userReservations) {
-      await setAsync({
-        key: `/api/reservations/${reservation.user.toString()}`,
-        value: [...userReservations, reservation],
-      });
-    } else {
-      await setAsync({
-        key: `/api/reservations/${reservation.user.toString()}`,
-        value: await ReservationModel.find({
-          user: reservation.user.toString(),
-        }),
-      });
-    }
+    // const currentEvent = (await getAsync(
+    //   `/api/events/${reservation.event.toString()}`
+    // )) as EventType;
 
-    const currentEvent = (await getAsync(
-      `/api/events/${reservation.event.toString()}`
-    )) as EventType;
-
-    await setAsync({
-      key: `/api/events/${reservation.event.toString()}`,
-      value: { ...currentEvent, seats: eventModel.seats },
-    });
+    // await setAsync({
+    //   key: `/api/events/${reservation.event.toString()}`,
+    //   value: { ...currentEvent, seats: eventModel.seats },
+    // });
 
     await generateReservationPDF(reservation, pdfPath);
 
