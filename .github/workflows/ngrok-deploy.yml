@@ -22,10 +22,28 @@ jobs:
           wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip -O ngrok.zip
           unzip ngrok.zip
           sudo mv ngrok /usr/local/bin/
-          ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
+
+      - name: Create Environment File for Docker Compose
+        run: |
+          echo "NGROK_AUTHTOKEN=${{ secrets.NGROK_AUTHTOKEN }}" >> .env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
+          echo "REACT_APP_BACKEND_URL=${{ secrets.REACT_APP_FRONTEND_URL }}" >> .env
+
+      - name: Create Backend Environment File
+        run: |
+          mkdir -p backend
+          echo "PORT=${{ secrets.PORT }}" >> backend/.env
+          echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> backend/.env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> backend/.env
+          echo "COOKIE_KEY=${{ secrets.COOKIE_KEY }}" >> backend/.env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> backend/.env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> backend/.env
+          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> backend/.env
+          echo "REACT_APP_FRONTEND_URL=${{ secrets.REACT_APP_FRONTEND_URL }}" >> backend/.env
 
       - name: Start Services with Docker Compose
-        run: docker-compose up -d --build
+        run: docker-compose up -d --build --env-file .env
 
       - name: Wait for Backend to Start
         run: |
