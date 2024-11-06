@@ -83,13 +83,24 @@ export const success = async (
       return res.status(404).json({ message: "Reservation not found" });
     }
 
+    const pdfDirectory = "/backend/pdfs";
+
+    if (!fs.existsSync(pdfDirectory)) {
+      fs.mkdirSync(pdfDirectory, { recursive: true });
+    }
+
     const pdfPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "pdfs",
-      `${(reservation._id as string).toString()}.pdf`
+      pdfDirectory,
+      `${(reservation._id as string).toString() as string}.pdf`
     );
+
+    // const pdfPath = path.join(
+    //   __dirname,
+    //   "..",
+    //   "..",
+    //   "pdfs",
+    //   `${(reservation._id as string).toString()}.pdf`
+    // );
     const eventModel: EventType | null = await Event.findById(
       reservation.event
     );
