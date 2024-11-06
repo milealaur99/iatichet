@@ -32,6 +32,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    command: bash -c "chmod -R 777 /backend/pdfs && npm start"
 
   ngrok:
     image: ngrok/ngrok
