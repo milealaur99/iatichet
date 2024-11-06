@@ -5,6 +5,7 @@ import { generateReservationPDF } from "../utils/pdfGenerator";
 import { timeoutStorage, getAsync, setAsync } from "../utils/redisUtils";
 import { Request, Response } from "express";
 import Stripe from "stripe";
+import fs from "fs";
 
 export const createCheckoutSession = async (req: Request, res: Response) => {
   try {
@@ -272,6 +273,19 @@ export const downloadPDFReservation = async (
     if (!reservation) {
       return res.status(404).json({ message: "Reservation not found" });
     }
+
+    const pdfsFolder = path.join(__dirname, "..", "..", "pdfs");
+
+    fs.readdir(pdfsFolder, (err, files) => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log(`Fișierele din folderul "pdfs":`);
+        files.forEach((file) => {
+          console.log(file);
+        });
+      }
+    });
     const pdfPath = path.join(
       __dirname,
       "..",
@@ -279,7 +293,7 @@ export const downloadPDFReservation = async (
       "pdfs",
       `${reservation._id}.pdf`
     );
-
+    console.log(pdfPath);
     res.download(pdfPath, `${reservation._id}.pdf`);
   } catch (error) {
     res.status(500).json({ message: "File not found" });

@@ -10,7 +10,7 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
       - WDS_SOCKET_HOST=localhost
-      - REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL:-http://localhost:5000}
+      - REACT_APP_BACKEND_URL=http://localhost:5000
     ports:
       - "3000:3000"
     depends_on:
@@ -23,8 +23,9 @@ services:
       - ./backend/uploads:/backend/uploads
       - ./backend/pdfs:/backend/pdfs
       - ./backend/assets:/backend/assets
-    env_file:
-      - ./backend/.env
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     ports:
       - "5000:5000"
     healthcheck:
@@ -37,9 +38,9 @@ services:
     image: ngrok/ngrok
     command: http backend:5000
     environment:
-      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+      - NGROK_AUTHTOKEN=2nWnlou7c6TWCiPmvlabD7STo9S_5qUF9NaFkfkdrvCs4wV8K
     ports:
-      - "4040:4040"
+      - "4040:4040" # Exposes the Ngrok web interface for monitoring
     depends_on:
       - backend
 
