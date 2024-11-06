@@ -60,7 +60,9 @@ jobs:
           done
 
       - name: Start Ngrok Tunnel
-        run: ngrok http 5000 --log=stdout > ngrok.log &
+        run: |
+          ngrok authtoken ${{ secrets.NGROK_AUTHTOKEN }}
+          ngrok http 5000 --log=stdout > ngrok.log &
 
       - name: Fetch Ngrok Public URL
         run: |
