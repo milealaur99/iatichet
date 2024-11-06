@@ -28,7 +28,7 @@ app.use("/api/health", (req: Request, res: Response) => {
   res.sendStatus(200);
 });
 
-// setupSecurity({ app });
+setupSecurity({ app });
 
 app.use("/api/auth", authRoutes);
 app.use("/api/reservations", reservationRoutes);
