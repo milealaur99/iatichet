@@ -43,7 +43,7 @@ jobs:
           echo "REACT_APP_FRONTEND_URL=${{ secrets.REACT_APP_FRONTEND_URL }}" >> backend/.env
 
       - name: Start Services with Docker Compose
-        run: docker-compose up -d --build --env-file .env
+        run: docker-compose up -d --build
 
       - name: Wait for Backend to Start
         run: |
