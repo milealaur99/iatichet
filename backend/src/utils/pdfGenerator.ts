@@ -24,8 +24,16 @@ export const generateReservationPDF = async (
       },
     });
     console.log(path);
-    doc.pipe(fs.createWriteStream(path));
-
+    doc.pipe(
+      fs
+        .createWriteStream(path)
+        .on("finish", () => {
+          console.log("PDF generated successfully:", path);
+        })
+        .on("error", (err) => {
+          console.error("Error generating PDF:", err);
+        })
+    );
     const user = await User.findById(reservation.user);
     if (!user) {
       throw new AppError("User not found", 404);
