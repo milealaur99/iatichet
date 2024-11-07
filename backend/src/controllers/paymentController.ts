@@ -273,7 +273,6 @@ export const downloadPDFReservation = async (
     if (!reservation) {
       return res.status(404).json({ message: "Reservation not found" });
     }
-
     const pdfPath = path.join(
       __dirname,
       "..",
@@ -281,6 +280,7 @@ export const downloadPDFReservation = async (
       "pdfs",
       `${reservation._id}.pdf`
     );
+
     res.download(pdfPath, `${reservation._id}.pdf`);
   } catch (error) {
     res.status(500).json({ message: "File not found" });
