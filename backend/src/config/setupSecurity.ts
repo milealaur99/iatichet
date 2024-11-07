@@ -13,17 +13,14 @@ import { swagger } from "../../src/config/swagger";
 import { initSetry } from "../../src/config/sentry";
 import Hall from "../models/Hall";
 
-// CSRF middleware
 const csrfProtection = csrf({
   cookie: true,
 });
 
-// Function to decide if CSRF setup should be called
 const setupCSRF = (
   { app }: { app: express.Express },
   isNgrokRequest: boolean
 ) => {
-  // Don't apply CSRF if it's an Ngrok request
   if (!isNgrokRequest) {
     app.use(csrfProtection);
 
@@ -34,9 +31,9 @@ const setupCSRF = (
 
     app.get("/api/csrf-token", (req: Request, res: Response) => {
       res.cookie("XSRF-TOKEN", req.csrfToken(), {
-        httpOnly: false, // Allow client-side JS to read the cookie
-        secure: true, // HTTPS
-        sameSite: "none", // Cross-site cookies allowed
+        httpOnly: false,
+        secure: true,
+        sameSite: "none",
       });
       res.json({ csrfToken: req.csrfToken() });
     });
@@ -47,7 +44,10 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
   app.use(helmet());
   app.use(
     cors({
-      origin: "https://iatichet-frontend.onrender.com",
+      origin: [
+        "https://iatichet-frontend.onrender.com",
+        "http://localhost:3000",
+      ],
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: [
@@ -90,9 +90,9 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: true, // HTTPS only
-        httpOnly: true, // JS can't access the cookie
-        sameSite: "none", // Cross-site cookies allowed
+        secure: true,
+        httpOnly: true,
+        sameSite: "none",
       },
     })
   );
@@ -101,14 +101,12 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
   swagger(app);
   initSetry();
 
-  // Detect if the request comes from Ngrok
   app.use((req: Request, res: Response, next: NextFunction) => {
     const isNgrokRequest = Boolean(
       req.get("origin")?.includes("ngrok.io") ||
         req.get("referer")?.includes("ngrok.io")
     );
 
-    // Conditionally call setupCSRF
     setupCSRF({ app }, isNgrokRequest);
     next();
   });

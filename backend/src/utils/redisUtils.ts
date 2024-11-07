@@ -2,10 +2,8 @@ import { promisify } from "util";
 import { client } from "../config/redis";
 import {
   convertBinaryToObject,
-  convertObjectToBinary
+  convertObjectToBinary,
 } from "../utils/binaryTransformer";
-
-client.on("error", (err) => console.log("Redis Client Error", err));
 
 client
   .connect()
@@ -13,7 +11,7 @@ client
     console.log("Connected to Redis");
   })
   .catch((err) => {
-    console.error("Error connecting to Redis:", err);
+    console.error("Error connecting to Redis:", err, "Try Again");
   });
 
 const getAsync = async (key: string) => {

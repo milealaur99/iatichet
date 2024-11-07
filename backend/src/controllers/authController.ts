@@ -28,9 +28,9 @@ export const login = async (req: Request & { user?: User }, res: Response) => {
     role: userModel.role,
   });
   res.cookie("jwt", token, {
-    httpOnly: true, // Ensures the cookie is only sent over HTTP(S) and not accessible via JavaScript
-    secure: true, // Ensures the cookie is only sent over HTTPS
-    sameSite: "none", // Allows the cookie to be sent across different domains
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
   });
 
   return res.json({

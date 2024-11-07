@@ -1,18 +1,14 @@
 import fs from "fs";
-import path from "path";
 import PDFDocument from "pdfkit";
 import { Reservation } from "../models/Reservation";
-import { Seat } from "../models/Hall";
 import qr from "qr-image";
+import { Seat } from "../models/Hall";
 
 export const generateReservationPDF = async (
   reservation: Reservation,
-  finalPath: string
+  path: string
 ): Promise<void> => {
   try {
-    // Directorul temporar în Docker
-    const tempPath = path.join("/tmp", `${reservation._id}.pdf`);
-
     const doc = new PDFDocument({
       size: "A4",
       layout: "portrait",
@@ -24,28 +20,17 @@ export const generateReservationPDF = async (
       },
     });
 
-    // Creăm stream-ul de fișier pentru directorul temporar
-    const tempFileStream = fs.createWriteStream(tempPath);
-    tempFileStream.on("open", () => {
+    const fileStream = fs.createWriteStream(path);
+    fileStream.on("open", () => {
       doc
-        .pipe(tempFileStream)
-        .on("finish", async () => {
-          console.log("PDF generated successfully in temp:", tempPath);
-
-          // Copiem fișierul PDF în directorul final din Docker
-          fs.copyFile(tempPath, finalPath, (err) => {
-            if (err) {
-              console.error("Error copying PDF to final path:", err);
-            } else {
-              console.log("PDF successfully copied to final path:", finalPath);
-            }
-          });
+        .pipe(fileStream)
+        .on("finish", () => {
+          console.log("PDF generated successfully:", path);
         })
-        .on("error", (err) => {
+        .on("error", (err: Error) => {
           console.error("Error generating PDF:", err);
         });
 
-      // Generăm conținutul PDF-ului
       const addHeader = () => {
         doc
           .fillColor("#333333")
@@ -53,6 +38,35 @@ export const generateReservationPDF = async (
           .font("Helvetica-Bold")
           .text("Event Reservation", { align: "center" })
           .moveDown();
+      };
+
+      const addFooter = () => {
+        doc
+          .fontSize(10)
+          .fillColor("#999999")
+          .text(
+            "For any questions, please contact the event organizer.",
+            50,
+            750,
+            {
+              align: "center",
+              width: 500,
+            }
+          )
+          .moveDown(0.5)
+          .fontSize(12)
+          .font("Helvetica-Bold")
+          .fillColor("#444444")
+          .text("Thank you for your reservation!", {
+            align: "center",
+            width: 500,
+          })
+          .fontSize(10)
+          .font("Helvetica")
+          .fillColor("#aaaaaa")
+          .text(`Page ${doc.bufferedPageRange().count}`, 50, 780, {
+            align: "center",
+          });
       };
 
       const addSeats = (seats: Seat[]) => {
@@ -72,14 +86,22 @@ export const generateReservationPDF = async (
         });
       };
 
-      // Adăugăm conținut în PDF
       addHeader();
-      addSeats(reservation.seats);
+      addSeats(reservation.seats.slice(0, 6));
+      addFooter();
 
-      doc.end(); // Finalizăm PDF-ul
+      for (let i = 6; i < reservation.seats.length; i += 6) {
+        doc.addPage();
+        addHeader();
+        addSeats(reservation.seats.slice(i, i + 6));
+        addFooter();
+      }
+
+      doc.end();
+      console.log("PDF generation completed:", path);
     });
 
-    tempFileStream.on("error", (err) => {
+    fileStream.on("error", (err: Error) => {
       console.error("Error opening file stream:", err);
     });
   } catch (error) {

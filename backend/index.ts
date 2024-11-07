@@ -13,10 +13,7 @@ import typeDefs from "./src/graphql/schema";
 import resolvers from "./src/graphql/resolver";
 import pdfRoutes from "./src/routes/pdfRoutes";
 import { router as paymentRoutes } from "./src/routes/paymentRoutes";
-import { Server as SocketServer } from "socket.io";
 import http from "http";
-import { usersViewingEvent } from "./src/utils/redisUtils";
-import { setup } from "swagger-ui-express";
 import { setupIoSockets } from "./src/config/ioSocket";
 
 dotenv.config();
@@ -68,7 +65,6 @@ setupIoSockets(server);
 mongoose
   .connect(process.env.MONGO_URI as string)
   .then(async () => {
-    console.log("aici ajunge lejer");
     server.listen({ port: PORT, host: "0.0.0.0" }, async () => {
       console.log(`Server running on port ${PORT}`);
       await apolloServer.start();
