@@ -252,7 +252,6 @@ export const cancel = async (
     `${process.env.REACT_APP_FRONTEND_URL}/cancel/${reservation._id}?eventId=${reservation.event}`
   );
 };
-
 export const downloadPDFReservation = async (
   req: Request & {
     user?: { id: string; username: string; password: string };
@@ -273,28 +272,40 @@ export const downloadPDFReservation = async (
       return res.status(404).json({ message: "Reservation not found" });
     }
 
-    const pdfsFolder = path.join(__dirname, "..", "..", "pdfs");
-
-    fs.readdir(pdfsFolder, (err, files) => {
-      if (err) {
-        console.error(err);
-      } else {
-        console.log(`Fișierele din folderul "pdfs":`);
-        files.forEach((file) => {
-          console.log(file);
-        });
-      }
-    });
-    const pdfPath = path.join(
+    // Calea către fișierul PDF în ambele locații
+    const tempPdfPath = path.join("/tmp", `${reservation._id}.pdf`);
+    const finalPdfPath = path.join(
       __dirname,
       "..",
       "..",
       "pdfs",
       `${reservation._id}.pdf`
     );
-    console.log(pdfPath);
-    res.download(pdfPath, `${reservation._id}.pdf`);
+
+    // Funcție pentru a încerca descărcarea fișierului
+    const tryDownloadFile = (filePath: string) => {
+      if (fs.existsSync(filePath)) {
+        console.log(`PDF found at: ${filePath}`);
+        return res.download(filePath, `${reservation._id}.pdf`);
+      } else {
+        console.log(`PDF not found at: ${filePath}`);
+        return false;
+      }
+    };
+
+    // Încercăm descărcarea mai întâi din directorul temporar
+    if (!tryDownloadFile(tempPdfPath)) {
+      // Dacă nu există, încercăm descărcarea din directorul final
+      if (!tryDownloadFile(finalPdfPath)) {
+        return res
+          .status(404)
+          .json({ message: "PDF file not found in any location" });
+      }
+    }
   } catch (error) {
-    res.status(500).json({ message: "File not found" });
+    console.error("Error in downloading PDF:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while downloading the file" });
   }
 };

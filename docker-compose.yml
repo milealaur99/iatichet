@@ -24,6 +24,8 @@ services:
       - ./backend/pdfs:/backend/pdfs
       - ./backend/assets:/backend/assets
       - ./backend/pdfs:/app/pdfs
+      - pdfs-temp:/tmp_pdfs
+      - /tmp:/tmp
     env_file:
       - ./backend/.env
     ports:
@@ -33,7 +35,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    command: bash -c "chmod -R 777 /backend/pdfs && npm start"
+    command: bash -c "chmod -R 777 /backend/pdfs /tmp_pdfs && npm start"
 
   ngrok:
     image: ngrok/ngrok
@@ -61,3 +63,4 @@ services:
 
 volumes:
   mongo-data:
+  pdfs-temp:
