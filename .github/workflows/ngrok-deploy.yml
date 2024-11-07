@@ -104,6 +104,16 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"clearCache": "do_not_clear"}' \
             https://api.render.com/v1/services/${{ secrets.SERVICE_ID }}/deploys
+      - name: Get Backend Container ID
+        id: backend_container_id
+        run: |
+          export CONTAINER_ID=$(docker ps --filter "name=backend" --format "{{.ID}}")
+          echo "Container ID: $CONTAINER_ID"
+          echo "container_id=$CONTAINER_ID" >> $GITHUB_ENV
+
+      - name: List PDF Files in Backend Container
+        run: |
+          docker exec ${{ env.container_id }} ls /backend/pdfs
 
       - name: Keep GitHub Actions Job Alive and Display Logs
         run: |
