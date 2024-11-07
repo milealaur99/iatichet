@@ -101,6 +101,7 @@ export const setupSecurity = ({ app }: { app: express.Express }) => {
   swagger(app);
   initSetry();
 
+  //
   app.use((req: Request, res: Response, next: NextFunction) => {
     const isNgrokRequest = Boolean(
       req.get("origin")?.includes("ngrok.io") ||
