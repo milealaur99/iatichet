@@ -48,7 +48,7 @@ jobs:
       - name: Wait for Backend to Start
         run: |
           echo "Waiting for backend to become healthy..."
-          RETRIES=20
+          RETRIES=50
           until docker-compose exec -T backend curl -f http://localhost:5000/api/health; do
             echo "Backend not healthy yet, retrying..."
             RETRIES=$((RETRIES-1))
