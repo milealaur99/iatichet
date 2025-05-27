@@ -127,18 +127,27 @@ export const getAllEvents = async (
     let currentEvents = await Event.find(query).populate("hall");
 
     if (seatsPercentage !== undefined) {
-      currentEvents = currentEvents.filter(async (event: EventType) => {
-        const totalSeats = event.seats.length;
-        const eventHall = await Hall.find(event.hall);
-        const hallSeats = eventHall[0].seats;
+      const filtered = await Promise.all(
+        currentEvents.map(async (event: EventType) => {
+          const totalSeats = event.seats.length;
+          const eventHall = await Hall.findById(event.hall);
+          const hallSeats = eventHall?.seats || [];
 
-        const availableSeats = hallSeats.filter(
-          (seat: Seat) => !seat.reservationOps.isReserved
-        ).length;
-        const calculatedSeatsPercentage = (availableSeats / totalSeats) * 100;
+          const availableSeats = hallSeats.filter(
+            (seat: Seat) => !seat.reservationOps.isReserved
+          ).length;
+          const calculatedSeatsPercentage = (availableSeats / totalSeats) * 100;
 
-        return calculatedSeatsPercentage >= seatsPercentage;
-      });
+          return {
+            include: calculatedSeatsPercentage >= seatsPercentage,
+            event,
+          };
+        })
+      );
+
+      currentEvents = filtered
+        .filter((result) => result.include)
+        .map((result) => result.event);
     }
 
     const totalEvents = currentEvents.length;
